@@ -16,7 +16,8 @@ with open("54564-54566.pdf", 'rb') as file:
     #workbook = openpyxl.load_workbook('file.xlsx')
 
     # Проходим по каждой странице PDF-файла
-    for page_num in range(len(pdf_reader.pages)):
+    #for page_num in range(len(pdf_reader.pages)):
+    for page_num in range(1):
         # Получаем объект страницы
         page = pdf_reader.pages[page_num]
 
@@ -25,10 +26,11 @@ with open("54564-54566.pdf", 'rb') as file:
 
         # Делим текст на строки и сохраняем в массив
         lines = text.split('\n')
+
         
 
         #_______________>
-        '''
+        
         #считываем строчку 
         send = []
 
@@ -55,6 +57,10 @@ with open("54564-54566.pdf", 'rb') as file:
         send4.append(ln1[1])
         send4.append(ln1[2])
         send4.append(ln1[3])
+
+        
+        send5  = ['ITEM Code', 'DESCRIPTION', '','SIZE', 'U.M', 'QTY', 'UNIT PRICE','DISC' ,'VALUE', 'C.I']
+        send.append(send5)
         
         #send.append(send4)
         #print(send)
@@ -73,15 +79,47 @@ with open("54564-54566.pdf", 'rb') as file:
         
 
         worksheet.append(send1)
+
+        #делаем жирную строку
+        '''
+        from openpyxl.styles import Font
+        red_font = Font(bold=True)
+       # Enumerate the cells in the second row
+        for cell in worksheet["2:2"]:
+            cell.font = red_font
+        '''
+        from openpyxl.styles import Font
+        bold_font = Font(bold=True)
+
+        for i in range(len(send1)) :
+            worksheet.cell(row=1, column= i+1).font = bold_font
+
         worksheet.append(send2)
 
         worksheet.append(send3)
+        #делать  шрифт жирным 
+        from openpyxl.styles import Font
+        bold_font = Font(bold=True)
+
+        for i in range(len(send3)) :
+            worksheet.cell(row=3, column= i+1).font = bold_font
         
  
         worksheet.append(send4)
+
+        worksheet.append(send5)
+        #делать  шрифт жирным 
+        from openpyxl.styles import Font
+        bold_font = Font(bold=True)
+
+        for i in range(len(send5)) :
+            worksheet.cell(row=5, column= i+1).font = bold_font
+
         # Сохраняем изменения в файл
         workbook.save('file.xlsx')
-        '''
+        
+
+
 
         # Добавляем текстовые данные в массив
         

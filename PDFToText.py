@@ -178,16 +178,62 @@ for i in range(2):
 '''
 #(y,x)
 #x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 1,  pandas_options={'header': None}, relative_area = True,area=(0, 0, 590, 580))
-x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 1, relative_area = True,area=(27.6, 0, 78, 10))
+x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 1, relative_area = True,area=(29.4, 0, 49.3 +29.4 ,78))
+#(27.6, 0, 70, 10)
+y = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 1, relative_area = True,area=(27.6, 10, 70, 30))
 
 print(x)
+'''
+# Проходимся по каждой строке таблицы
+for row in x.iterrows():
+    # Проходимся по каждому столбцу в строке
+    for col in row[1].iteritems():
+        # Получаем данные в ячейке
+        cell_data = col[1]
+        # Обрабатываем данные, как нужно
+        # ...
+#переводим в массив чисел 
+'''
+
+#mas = x[0].split('\n')
+
+#print(x[3])
 
 send = np.array(x)
+send2 = np.array(y)
+print(send)
+
 df = pd.DataFrame(send[0])
                   
 #df.columns = column_names
-df.to_excel('tables.xlsx', header=False, index = True)
-print(send[0][1])
+
+#with pd.ExcelWriter('tables.xlsx', mode='a') as writer:  
+#     df.to_excel('tables.xlsx', header=False, index = True)
+
+#with pd.ExcelWriter("tables.xlsx", engine="openpyxl", mode="a") as writer:
+with pd.ExcelWriter("tables.xlsx", mode="a", engine="openpyxl", if_sheet_exists='overlay') as writer:
+    #book = load_workbook('tables.xlsx')
+    #writer.sheets.update = {ws.title: ws for ws in book.worksheets}
+    
+    #получаем максимально число строк 
+    import openpyxl
+    APIworkbook = openpyxl.load_workbook("tables.xlsx")
+    APISheet = APIworkbook['Sheet1']
+    max_row_count = 0
+    for row in APISheet.rows:
+        for cell in row:
+            if cell.value:
+                max_row_count += 1
+                break
+
+    #print(max_row_count)
+    df.to_excel(writer, sheet_name = 'Sheet1',  startrow =0, startcol= 0, header=False, index = False )
+#df.to_excel('tables.xlsx', header=False, index = True)
+
+
+
+
+#print(send[0][1])
 
 
 
