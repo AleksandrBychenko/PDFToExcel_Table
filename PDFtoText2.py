@@ -12,7 +12,12 @@ with open("54564-54566.pdf", 'rb') as file:
     text_data = []
 
     # Открываем Excel-файл
-    workbook = openpyxl.Workbook()
+    #workbook = openpyxl.Workbook()
+    workbook = openpyxl.load_workbook('file.xlsx')
+    worksheet = workbook.active
+    if worksheet.title != 'Sheet1':
+        orksheet = workbook.create_sheet('Sheet1')
+   
     #workbook = openpyxl.load_workbook('file.xlsx')
 
     # Проходим по каждой странице PDF-файла
@@ -65,6 +70,18 @@ with open("54564-54566.pdf", 'rb') as file:
         #send.append(send4)
         #print(send)
 
+        #ДОБАВЛЯЕМ НУЖНУЮ ЧАСТЬ 
+
+        import tabula
+        import numpy as np
+        import pandas as pd
+        x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 1, relative_area = True,area=(29.4, 0, 49.3 +29.4 ,78))
+        
+        send = np.array(x)
+        df = pd.DataFrame(send[0])
+
+ 
+        #НАЧИНАЕМ ДОБАВЛЯТЬ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         # Получаем активный лист
         worksheet = workbook.active
@@ -117,6 +134,26 @@ with open("54564-54566.pdf", 'rb') as file:
 
         # Сохраняем изменения в файл
         workbook.save('file.xlsx')
+        
+
+        with pd.ExcelWriter("file.xlsx", mode="a", engine="openpyxl", if_sheet_exists='overlay') as writer:
+
+            import openpyxl
+            APIworkbook = openpyxl.load_workbook("file.xlsx")
+            APISheet = APIworkbook['Sheet1']
+            max_row_count = 0
+
+            for row in APISheet.rows:
+                for cell in row:
+                    if cell.value:
+                        max_row_count += 1
+                        break
+
+            df.to_excel(writer, startrow = max_row_count, startcol= 0, header=False, index = False )
+
+
+        # Сохраняем изменения в файл
+        #workbook.save('file.xlsx')
         
 
 
