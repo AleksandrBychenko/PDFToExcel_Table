@@ -152,7 +152,9 @@ from openpyxl import load_workbook
 
 # creating a pdf reader object
 reader = PdfReader('54564-54566.pdf')
-  
+
+
+'''
 # printing number of pages in pdf file len(reader.pages)
 for i in range(2):
     x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 1,  pandas_options={'header': None}, relative_area = True,area=(0, 0, 590, 580))
@@ -173,7 +175,13 @@ for i in range(2):
     #df.columns = column_names
     df.to_excel('tables.xlsx', header=False, index = True)
 
-x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 2,  pandas_options={'header': None}, relative_area = True,area=(0, 0, 590, 580))
+'''
+#(y,x)
+#x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 1,  pandas_options={'header': None}, relative_area = True,area=(0, 0, 590, 580))
+x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 1, relative_area = True,area=(27.6, 0, 78, 10))
+
+print(x)
+
 send = np.array(x)
 df = pd.DataFrame(send[0])
                   
