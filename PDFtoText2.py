@@ -3,6 +3,8 @@ import textract
 import numpy as np
 import openpyxl
 
+
+
 # Открываем PDF-файл
 with open("54564-54566.pdf", 'rb') as file:
     # Создаем объект для чтения PDF-файла
@@ -10,15 +12,35 @@ with open("54564-54566.pdf", 'rb') as file:
 
     # Создаем массив для хранения текстовых данных
     text_data = []
-
-    # Открываем Excel-файл
+    #@@@@@@@@@@@@@@@@@@@@@@@@@@
+    # Открываем Excel-файл 
     #workbook = openpyxl.Workbook()
-    workbook = openpyxl.load_workbook('file.xlsx')
+    import os
+    path = "file.xlsx"
+
+    if os.path.exists(path):
+        # Открываем файл Excel
+        workbook = openpyxl.load_workbook(path)
+    else:
+        # Создаем новый файл Excel
+        workbook = openpyxl.Workbook()
+        workbook.save(path)
+
+    #workbook = openpyxl.load_workbook('file.xlsx')
+    # Получаем активный лист
     worksheet = workbook.active
     if worksheet.title != 'Sheet1':
         orksheet = workbook.create_sheet('Sheet1')
    
+
+    # Очищаем содержимое листа
+    worksheet.delete_rows(1, worksheet.max_row)
+
+    # Сохраняем изменения в файл Excel
+    workbook.save(path)
+
     #workbook = openpyxl.load_workbook('file.xlsx')
+    #@@@@@@@@@@@@@@2
 
     # Проходим по каждой странице PDF-файла
     #for page_num in range(len(pdf_reader.pages)):
@@ -75,7 +97,7 @@ with open("54564-54566.pdf", 'rb') as file:
         import tabula
         import numpy as np
         import pandas as pd
-        x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 1, relative_area = True,area=(29.4, 0, 49.3 +29.4 ,78))
+        x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(29.4, 0, 49.3 +29.4 ,78))
         
         send = np.array(x)
         df = pd.DataFrame(send[0])
@@ -152,26 +174,26 @@ with open("54564-54566.pdf", 'rb') as file:
                         max_row_count += 1
                         break
 
-            df.to_excel(writer, startrow = max_row_count, startcol= 0, header=False, index = False )
+            df.to_excel(writer, startrow = 5, startcol= 0, header=False, index = False )
 
-
+        '''
             # ПРОХОДИМСЯ ПО ЭКСЕЛЮ  И  ИЗМЕНЯЕМ ЕГО  ЕСЛИ  ЧТО        
             # пройтись по всем ячейкам на листе
-            for row in worksheet.iter_rows():
+        for row in worksheet.iter_rows():
 
-                for cell in row:
+            for cell in row:
 
-                    #first_word = cell.value.split(' ')[0]
-                    print( cell.value)
-                    # проверить значение ячейки на наличие слова "apple"
-                    if cell.value == 'Country':
-                        # изменить значение ячейки на "orange"
-                        cell.value = 'orange'
-                        # записать значение "banana" в следующую ячейку
-                        next_cell = worksheet.cell(row=cell.row, column=cell.column+1)
-                        next_cell.value = 'banana'
-            
-
+                #first_word = cell.value.split(' ')[0]
+                print( cell.value)
+                 # проверить значение ячейки на наличие слова "apple"
+                if cell.value == 'Cuntry':
+                     # изменить значение ячейки на "orange"
+                    cell.value = 'orange'
+                    # записать значение "banana" в следующую ячейку
+                    next_cell = worksheet.cell(row=cell.row, column=cell.column+1)
+                    next_cell.value = 'banana'
+        workbook.save('file.xlsx') 
+        '''
 
 
         # Сохраняем изменения в файл
