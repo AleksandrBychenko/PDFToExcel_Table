@@ -135,6 +135,9 @@ with open("54564-54566.pdf", 'rb') as file:
         # Сохраняем изменения в файл
         workbook.save('file.xlsx')
         
+        #добавляем таблицу 
+
+        #Добовляем таблицу 
 
         with pd.ExcelWriter("file.xlsx", mode="a", engine="openpyxl", if_sheet_exists='overlay') as writer:
 
@@ -150,6 +153,25 @@ with open("54564-54566.pdf", 'rb') as file:
                         break
 
             df.to_excel(writer, startrow = max_row_count, startcol= 0, header=False, index = False )
+
+
+            # ПРОХОДИМСЯ ПО ЭКСЕЛЮ  И  ИЗМЕНЯЕМ ЕГО  ЕСЛИ  ЧТО        
+            # пройтись по всем ячейкам на листе
+            for row in worksheet.iter_rows():
+
+                for cell in row:
+
+                    #first_word = cell.value.split(' ')[0]
+                    print( cell.value)
+                    # проверить значение ячейки на наличие слова "apple"
+                    if cell.value == 'Country':
+                        # изменить значение ячейки на "orange"
+                        cell.value = 'orange'
+                        # записать значение "banana" в следующую ячейку
+                        next_cell = worksheet.cell(row=cell.row, column=cell.column+1)
+                        next_cell.value = 'banana'
+            
+
 
 
         # Сохраняем изменения в файл
