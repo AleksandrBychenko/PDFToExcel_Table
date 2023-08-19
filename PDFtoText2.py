@@ -47,6 +47,7 @@ with open("54564-54566.pdf", 'rb') as file:
     #for page_num in range(len(pdf_reader.pages)):
     for page_num in range(1):
         # Получаем объект страницы
+        page_num = 2
         page = pdf_reader.pages[page_num]
 
         # Извлекаем текстовые данные из страницы
@@ -79,7 +80,7 @@ with open("54564-54566.pdf", 'rb') as file:
         #print(lines[0], lines[1], lines[2], lines[3],lines[4], lines[5], lines[6],lines[7])
         send4 = []
         ln1 = re.split('\s+', lines[1])
-        print(lines[6].split(' ')[0], ln1, lines[0].split(' '))
+        #print(lines[6].split(' ')[0], ln1, lines[0].split(' '))
         send4.append(lines[0].split(' ')[0])
         send4.append(lines[6].split(' ')[0])
         send4.append(ln1[1])
@@ -87,7 +88,7 @@ with open("54564-54566.pdf", 'rb') as file:
         send4.append(ln1[3])
 
         
-        send5  = ['ITEM Code', 'DESCRIPTION', '','SIZE', 'U.M', 'QTY', 'UNIT PRICE','DISC' ,'VALUE', 'C.I']
+        send5  = ['ITEM Code', 'DESCRIPTION','SIZE', 'U.M', 'QTY', 'UNIT PRICE','VALUE','', 'C.I']
         send.append(send5)
         
         #send.append(send4)
@@ -105,6 +106,7 @@ with open("54564-54566.pdf", 'rb') as file:
         y = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(23, 0, 49.3 + 23 ,10))
         
         check = np.array(y)
+        print(check)
         #print(check)
         send = np.array(x)
         df = pd.DataFrame(send[0])
@@ -212,7 +214,7 @@ with open("54564-54566.pdf", 'rb') as file:
             for cell in row:
 
                 #first_word = cell.value.split(' ')[0]
-                print( cell.value)
+                #print( cell.value)
                  # проверить значение ячейки на наличие слова "apple"
                 if  cell.value is not None and 'Country' in str(cell.value): 
                     
@@ -232,11 +234,16 @@ with open("54564-54566.pdf", 'rb') as file:
                 for i in range(len(check)):
                     for j in range(len(check[i])):
                         for k in range(0, len(check[i][j]), 2):
-                            if 'SOLE' in check[i][j][k]:
+                            if check[i][j][k] is not None and type(check[i][j][k]) == str and 'SOLE' in check[i][j][k]:
                                 break
                             else:
-                                if  cell.value is not None and check[i][j][k] in str(cell.value):
+                                if  cell.value is not None and type(check[i][j][k]) == str and check[i][j][k] in str(cell.value):
+                                    my_list = cell.value.split(check[i][j][k])
+                                    #print(my_list)
+                                    next_cell = worksheet.cell(row=cell.row, column=cell.column+1)
                                     cell.value = check[i][j][k]
+                                    next_cell.value = my_list[1]
+                                    break
                 
 
 
