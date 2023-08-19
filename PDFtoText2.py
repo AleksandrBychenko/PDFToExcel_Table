@@ -29,8 +29,9 @@ with open("54564-54566.pdf", 'rb') as file:
     #workbook = openpyxl.load_workbook('file.xlsx')
     # Получаем активный лист
     worksheet = workbook.active
+
     if worksheet.title != 'Sheet1':
-        orksheet = workbook.create_sheet('Sheet1')
+        worksheet = workbook.create_sheet('Sheet1')
    
 
     # Очищаем содержимое листа
@@ -157,8 +158,7 @@ with open("54564-54566.pdf", 'rb') as file:
         # Сохраняем изменения в файл
         workbook.save('file.xlsx')
         
-        #добавляем таблицу 
-
+        workbook.close()
         #Добовляем таблицу 
 
         with pd.ExcelWriter("file.xlsx", mode="a", engine="openpyxl", if_sheet_exists='overlay') as writer:
@@ -175,8 +175,30 @@ with open("54564-54566.pdf", 'rb') as file:
                         break
 
             df.to_excel(writer, startrow = 5, startcol= 0, header=False, index = False )
-
+            
         '''
+            for row in worksheet.iter_rows():
+
+                for cell in row:
+
+                    #first_word = cell.value.split(' ')[0]
+                    print( cell.value)
+                     # проверить значение ячейки на наличие слова "apple"
+                    if cell.value == 'Country of origin: ITALY':
+                         # изменить значение ячейки на "orange"
+                        cell.value = 'orange'
+                        # записать значение "banana" в следующую ячейку
+                        next_cell = worksheet.cell(row=cell.row, column=cell.column+1)
+                        next_cell.value = 'banana'
+        '''
+        # Открываем файл Excel
+        workbook = openpyxl.load_workbook(path)
+        worksheet = workbook.active
+        worksheet.append(send2)
+
+
+            #workbook.save('file.xlsx')
+        
             # ПРОХОДИМСЯ ПО ЭКСЕЛЮ  И  ИЗМЕНЯЕМ ЕГО  ЕСЛИ  ЧТО        
             # пройтись по всем ячейкам на листе
         for row in worksheet.iter_rows():
@@ -186,14 +208,18 @@ with open("54564-54566.pdf", 'rb') as file:
                 #first_word = cell.value.split(' ')[0]
                 print( cell.value)
                  # проверить значение ячейки на наличие слова "apple"
-                if cell.value == 'Cuntry':
-                     # изменить значение ячейки на "orange"
-                    cell.value = 'orange'
-                    # записать значение "banana" в следующую ячейку
-                    next_cell = worksheet.cell(row=cell.row, column=cell.column+1)
-                    next_cell.value = 'banana'
-        workbook.save('file.xlsx') 
-        '''
+                if  cell.value is not None and 'Country' in str(cell.value): 
+                    
+                        # изменить значение ячейки на "orange"
+                        cell.value = 'orange'
+                        # записать значение "banana" в следующую ячейку
+                        next_cell = worksheet.cell(row=cell.row, column=cell.column+1)
+                        next_cell.value = 'banana'
+        #workbook.save('file.xlsx') 
+        
+        workbook.save('file.xlsx')
+        # Закрываем файл Excel
+        workbook.close()
 
 
         # Сохраняем изменения в файл
