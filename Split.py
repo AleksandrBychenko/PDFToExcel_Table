@@ -1,11 +1,13 @@
-import re
+my_string = "world, how and are you?"
+my_word = 'world'
 
-#my_string = "abc123"
-#M6392ASCOT NERO-SENZA ETICHETTA
-my_string = "M6392ASCOT NERO-SENZA ETICHETTA"
-match = re.search(r"(\D+)(\d+)$", my_string)
+# Разбиваем строку на список слов
+my_list = my_string.split(my_word)
 
-if match:
-    first_part = match.group(1)
-    second_part = match.group(2)
-    print(first_part, second_part)
+# Удаляем слово из списка
+#my_list.remove(my_word)
+
+# Соединяем список обратно в строку
+new_string = "".join(my_list)
+
+print(new_string)

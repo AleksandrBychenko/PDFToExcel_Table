@@ -216,12 +216,18 @@ with open("54564-54566.pdf", 'rb') as file:
                  # проверить значение ячейки на наличие слова "apple"
                 if  cell.value is not None and 'Country' in str(cell.value): 
                     
+                        
                         # изменить значение ячейки на "orange"
-                        cell.value = 'orange'
+                        my_list = cell.value.split('Country of origin:')
+                        cell.value = 'Country of origin:'
+                        worksheet.cell(row=cell.row, column=cell.column).font = bold_font
                         # записать значение "banana" в следующую ячейку
                         next_cell = worksheet.cell(row=cell.row, column=cell.column+1)
-                        next_cell.value = 'banana'
-                
+
+                        new_string = "".join(my_list)
+                        my_list = new_string.split('H. S  :') 
+                        next_cell.value = my_list[0]
+                        
                 
                 for i in range(len(check)):
                     for j in range(len(check[i])):
@@ -232,6 +238,8 @@ with open("54564-54566.pdf", 'rb') as file:
                                 if  cell.value is not None and check[i][j][k] in str(cell.value):
                                     cell.value = check[i][j][k]
                 
+
+
 
         #workbook.save('file.xlsx') 
         
