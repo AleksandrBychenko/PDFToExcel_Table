@@ -98,8 +98,14 @@ with open("54564-54566.pdf", 'rb') as file:
         import tabula
         import numpy as np
         import pandas as pd
-        x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(29.4, 0, 49.3 +29.4 ,78))
+        #x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(29.4, 0, 49.3 +29.4 ,78))
+        x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(23, 0, 49.3 + 23 ,0 + 110))
+        #x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(23, 0, 29.4,0 + 110))
+        #x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True)
+        y = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(23, 0, 49.3 + 23 ,10))
         
+        check = np.array(y)
+        #print(check)
         send = np.array(x)
         df = pd.DataFrame(send[0])
 
@@ -194,7 +200,7 @@ with open("54564-54566.pdf", 'rb') as file:
         # Открываем файл Excel
         workbook = openpyxl.load_workbook(path)
         worksheet = workbook.active
-        worksheet.append(send2)
+        #worksheet.append(send2)
 
 
             #workbook.save('file.xlsx')
@@ -215,6 +221,18 @@ with open("54564-54566.pdf", 'rb') as file:
                         # записать значение "banana" в следующую ячейку
                         next_cell = worksheet.cell(row=cell.row, column=cell.column+1)
                         next_cell.value = 'banana'
+                
+                
+                for i in range(len(check)):
+                    for j in range(len(check[i])):
+                        for k in range(0, len(check[i][j]), 2):
+                            if 'SOLE' in check[i][j][k]:
+                                break
+                            else:
+                                if  cell.value is not None and check[i][j][k] in str(cell.value):
+                                    cell.value = check[i][j][k]
+                
+
         #workbook.save('file.xlsx') 
         
         workbook.save('file.xlsx')
