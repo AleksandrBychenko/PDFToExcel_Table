@@ -2,7 +2,7 @@ import PyPDF2
 import textract
 import numpy as np
 import openpyxl
-
+import tabula
 
 
 # Открываем PDF-файл
@@ -47,7 +47,7 @@ with open("54564-54566.pdf", 'rb') as file:
     #for page_num in range(len(pdf_reader.pages)):
     for page_num in range(1):
         # Получаем объект страницы
-        page_num = 2
+        page_num = 5
         page = pdf_reader.pages[page_num]
 
         # Извлекаем текстовые данные из страницы

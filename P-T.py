@@ -13,7 +13,7 @@ x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, p
 
 
 # Поиск места     
-#y = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = 1, relative_area = True,area=(3, 49, 11, 91))        
+y = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = 1, relative_area = True,area=(3, 49, 11, 91))        
 #CODe
 #y = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = 1, relative_area = True,area=(15, 0, 20, 8))        
 #y = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = 1, relative_area = True,area=(15, 8, 20, 23))
@@ -34,8 +34,11 @@ x = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, p
 #CI = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 1, relative_area = True,area=(21, 88, 69, 94))
 check = np.array(y)
 print(check)
+
 #print(check)
+
 send = np.array(y)
+
 df = pd.DataFrame(send[0])
 
 df.to_excel('example.xlsx', index=False)
