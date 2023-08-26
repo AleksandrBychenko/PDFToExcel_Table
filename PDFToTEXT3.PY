@@ -23,10 +23,13 @@ with open("54564-54566.pdf", 'rb') as file:
         # Получаем активный лист
     worksheet = workbook.active
 
+    # Очищаем содержимое листа
+    worksheet.delete_rows(1, worksheet.max_row)
+
     for page_num in range(1):
         
         #сразуже номер для проверки
-        page_num = 1 
+        page_num = 2
         send = []   
 
 #<-------------------
@@ -94,6 +97,9 @@ with open("54564-54566.pdf", 'rb') as file:
         #print(sole_mas)
 #<3SOLE:-end-----COMPOSITION----------------------------------------------
 
+#провверка не другой ли формат $$$$$
+        net_li = False
+
 #<проверка на сдвиг-------- 
         #проверка сдвиг есть или нет относительно начала ITEM CODE
         cdvig = 2
@@ -101,7 +107,11 @@ with open("54564-54566.pdf", 'rb') as file:
         y1 = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(22, 0, 69, 11))
         #записываем в массив 
         send_y1 = np.array(y1)
-        
+
+        #провверка не другой ли формат $$$$$
+        if len(send_y1[0])  == 0:
+            net_li = True
+
                 # Проходим по каждому элементу массива
         for i in range(len(send_y1)):
             for j in range(len(send_y1[i])):
@@ -124,9 +134,11 @@ with open("54564-54566.pdf", 'rb') as file:
 
 
 #<4-ITEM CODE----------
+        #>>>это поменять y1 !!!!!!!!!
         #сканируем область 
         y1 = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(22, 0, 69, 11))
         #записываем в массив 
+        #>>>это поменять y1 !!!!!!!!!
         send_y1 = np.array(y1)
         
         #проверка на сдвиг
@@ -164,6 +176,102 @@ with open("54564-54566.pdf", 'rb') as file:
                     nuzno  = True
         
 #<4-ITEM CODE-end---------
+
+#<DESCRIPTION-COMPOSITIO---COUNTRY OF ORIGIN---------
+        #сканируем участок 
+        y2 = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(22, 11, 69, 41))
+        #то что отсканируем переводим в массив
+        send_y1 = np.array(y2)
+        
+        
+        #c какой стороки начинаем 
+        row_index = 2
+
+        #проверка что есть элементы
+        pusto = False
+
+        #разделитель для колонки описания 
+        code =' '
+
+
+
+
+        #проверка на то что мы отсканировали нужно ли вставлять 
+        nuzno = True
+        # Проходим по каждому элементу массива отсканированному 
+        for i in range(len(send_y1)):
+            for j in range(len(send_y1[i])):
+                for k in range(len(send_y1[i][j])):
+           
+                    #проходим по массиву проверки и сравниваем 
+                    for x in range(len(sole_mas)):
+                        for y in range(len(sole_mas[x])):
+
+
+                            send_delet = str(send_y1[i][j][k]).split(' ')
+                            #проходимся по строке элемента сканера                             
+                            for z in range(len(send_delet)):
+
+                                #проверка не совпадает ли с массивом проверки 
+                                if sole_mas[x][y] == send_delet[z]:
+                                    nuzno = False
+                                    
+                                #проверка на пустой     
+                                if send_y1[i][j][k] is  None:
+                                    nuzno = False
+                                
+                                #проверка на нан , часто пападается (это работает если столбец не пустой проверки!)
+                                if str(send_y1[i][j][k]) == 'nan':
+                                    nuzno = False
+                                    
+                          
+
+                    #если подходит отсылаем 
+                    if  nuzno  == True:
+                        #находим строчку со страной и от нее и скачим 
+                        if   'Country' in str(send_y1[i][j][k]): 
+                           
+                        
+                             # обработка этой строки на нужные слова !!!!!  - не учитывапется если нет sole
+                            my_list = send_y1[i][j][k].split('Country of origin:')
+                            if len(my_list)== 1: 
+                                my_list = my_list[0].split('H. S  :')
+                            if len(my_list) > 1: 
+                                my_list = my_list[1].split('H. S  :')
+                            
+                            if len(my_list) == 2:
+                                worksheet['J' + str(row_index)] = my_list[0].replace(" ", "")
+                                worksheet['K' + str(row_index)] = my_list[1].replace(" ", "")
+                                code = my_list[1].replace(" ", "")
+                            if len(my_list) != 2:
+                                worksheet['J' + str(row_index)] = my_list[0].replace(" ", "")
+                            
+                            if cdvig == 2:
+                                description = send_y1[i][j-2][k]
+                                description_send = description.split(code)
+                                worksheet['H' + str(row_index)] = description_send[0].replace(" ", "")
+                            else:
+                                if row_index != 2:
+                                    description = send_y1[i][j-2][k]
+                                    description_send = description.split(code)
+                                    worksheet['H' + str(row_index)] = description_send[0].replace(" ", "")
+
+                            
+                            # увеличение индекса строки на 1 
+                            row_index += 1
+                    # возрощаем значение для проверки
+                    nuzno  = True
+
+                    #провверка не другой ли формат $$$$$
+                    if net_li == True:
+                         #проверка на нан , часто пападается (это работает если столбец не пустой проверки!)
+                        if str(send_y1[i][j][k]) == 'nan':
+                            pass
+                        else:
+                            worksheet['H' + str(row_index)] = send_y1[i][j][k]
+                            row_index += 1  
+
+#<DESCRIPTION-COMPOSITIO---COUNTRY OF ORIGIN----end-----
 
 #<-5--SIZE--(расписано)------------
         #сканируем участок 
