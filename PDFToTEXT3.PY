@@ -52,10 +52,13 @@ with open("54564-54566.pdf", 'rb') as file:
 
 
 #<2Castomeer---------------------------------
-                
+         #сканируем область       
         CUSTOMER = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 49, 11, 91))        
+        
+        #проверка если место будет пустое 
         #CUSTOMER = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
-
+        
+        #делаем из отосланного массив
         send_CUST = np.array(CUSTOMER)
 
         # создание пустой строки
@@ -71,6 +74,108 @@ with open("54564-54566.pdf", 'rb') as file:
         worksheet['A2'] = my_str
  
 #<2Castomeer-end--------------------------------
+
+#<2Cust Code---------------------------------
+        #сканируем область      
+        Cust_Code = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(15, 0, 20, 8))        
+        
+        #проверка если место будет пустое 
+        #Cust_Code = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+        
+        #делаем из отосланного массив
+        send_CUST = np.array(Cust_Code)
+
+        # создание пустой строки
+        my_str= ''
+
+        # проход по элементам массива и добавление каждого элемента в строку
+        for i in range(len(send_CUST)):
+            for j in range(len(send_CUST[i])):
+                for k in range(len(send_CUST[i][j])):
+                    my_str += str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+
+        #добовляем значение
+        worksheet['B2'] = my_str
+ 
+#<Cust Code-end--------------------------------
+
+#<VAT NO---------------------------------
+        #сканируем область      
+        VAT_nO = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(15, 8, 20, 23))        
+        
+        #проверка если место будет пустое 
+        #Cust_Code = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+        
+        #делаем из отосланного массив
+        send_CUST = np.array(VAT_nO)
+
+        # создание пустой строки
+        my_str= ''
+
+        # проход по элементам массива и добавление каждого элемента в строку
+        for i in range(len(send_CUST)):
+            for j in range(len(send_CUST[i])):
+                for k in range(len(send_CUST[i][j])):
+                    my_str += str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+
+        #добовляем значение
+        worksheet['C2'] = my_str
+ 
+#<VAT NO-end--------------------------------
+
+
+#<NO---------------------------------
+        #сканируем область      
+        nO = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(15, 23, 20, 30))        
+        
+        #проверка если место будет пустое 
+        #Cust_Code = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+        
+        #делаем из отосланного массив
+        send_CUST = np.array(nO)
+
+        # создание пустой строки
+        my_str= ''
+
+        # проход по элементам массива и добавление каждого элемента в строку
+        for i in range(len(send_CUST)):
+            for j in range(len(send_CUST[i])):
+                for k in range(len(send_CUST[i][j])):
+                    my_str += str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+
+        #добовляем значение
+        worksheet['D2'] = my_str
+        No = my_str
+ 
+#<NO-end--------------------------------
+
+#<Date--Page-------------------------------
+
+
+        #сканируем область    !!! в данной облости можно только 3 ячейки сразу же !!!!!!!!!!!!!!!!!!!  
+        date = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(15, 23, 20, 47))        
+        
+        #проверка если место будет пустое 
+        #date = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+        
+        #делаем из отосланного массив
+        send_CUST = np.array(date)
+
+        #просматриваем трайной массив и отправляем его по частям 
+        if not date:
+            pass
+        else:
+            if len(send_CUST[0][0]) == 3:
+                worksheet['E2'] = send_CUST[0][0][1]
+                worksheet['F2'] = send_CUST[0][0][2]
+            if len(send_CUST[0][0]) == 2 and send_CUST[0][0] == '54564':
+                worksheet['E2'] = send_CUST[0][0][1]
+                worksheet['F2'] = send_CUST[0][0][2]
+            if len(send_CUST[0][0]) == 1 and send_CUST[0][0] == '54564':
+                worksheet['E2'] = send_CUST[0][0][1]
+                
+        
+#<Date-Page-end--------------------------------
 
 #<3SOLE:--!!!! и дрогое--------------------------------------------------
         #1)Проходимся по всему участку 2) делаем массив исклучений sole_mas 3) добавляем Sole  
@@ -106,10 +211,12 @@ with open("54564-54566.pdf", 'rb') as file:
         #сканируем область 
         y1 = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(22, 0, 69, 11))
         #записываем в массив 
+        #y1 = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(5, 0, 10, 12))
+        
         send_y1 = np.array(y1)
-
+        
         #провверка не другой ли формат $$$$$
-        if len(send_y1[0])  == 0:
+        if not y1:
             net_li = True
 
                 # Проходим по каждому элементу массива
