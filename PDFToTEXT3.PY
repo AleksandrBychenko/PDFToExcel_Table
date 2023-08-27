@@ -11,26 +11,32 @@ import pandas as pd
 #<-------------------
 # открываем пдф и проходим по страницам 
 with open("54564-54566.pdf", 'rb') as file:
-    path = "file2.xlsx"
-
-    if os.path.exists(path):
-        # Открываем файл Excel
-        workbook = openpyxl.load_workbook(path)
-    else:
-        # Создаем новый файл Excel
-        workbook = openpyxl.Workbook()
-        workbook.save(path)
     
-        # Получаем активный лист
-    worksheet = workbook.active
+    pdf_reader = PyPDF2.PdfReader(file)
 
-    # Очищаем содержимое листа
-    worksheet.delete_rows(1, worksheet.max_row)
 
-    for page_num in range(1):
+
+    for page_num in range(1,(len(pdf_reader.pages) + 1)):
         
+        #path = "file2.xlsx"
+        path = 'scan_'+str(page_num)+'.xlsx'
+
+        if os.path.exists(path):
+            # Открываем файл Excel
+            workbook = openpyxl.load_workbook(path)
+        else:
+            # Создаем новый файл Excel
+            workbook = openpyxl.Workbook()
+            workbook.save(path)
+         
+             # Получаем активный лист
+        worksheet = workbook.active
+
+         # Очищаем содержимое листа
+        worksheet.delete_rows(1, worksheet.max_row)
+
         #сразуже номер для проверки
-        page_num = 11
+        #page_num = 11
         send = []   
 
 #<-------------------
@@ -668,18 +674,24 @@ with open("54564-54566.pdf", 'rb') as file:
         send_y1 = np.array(ci)
         #проверка на то что мы отсканировали нужно ли вставлять 
         nuzno = True
-        #ищем заголовок 
-        df = pd.DataFrame(ci[0])
         
-        # получаем название столбца
-        column_name = df.columns[0]
+        row_index = cdvig
 
-        #обработка названия столбца 
-        if any(c.isalpha() for c in column_name):
-            row_index = cdvig
+        if not ci:
+            pass
         else:
-            worksheet['Q' + str(cdvig)] = column_name
-            row_index = cdvig + 1
+            #ищем заголовок
+            df = pd.DataFrame(ci[0])
+            
+            # получаем название столбца
+            column_name = df.columns[0]
+
+            #обработка названия столбца 
+            if any(c.isalpha() for c in column_name):
+                row_index = cdvig
+            else:
+                worksheet['Q' + str(cdvig)] = column_name
+                row_index = cdvig + 1
         
         # Проходим по каждому элементу массива отсканированному 
         for i in range(len(send_y1)):
@@ -729,3 +741,4 @@ with open("54564-54566.pdf", 'rb') as file:
 #<-C.I-end-------------
         # Сохраняем файл
         workbook.save(path)
+        workbook.close()
