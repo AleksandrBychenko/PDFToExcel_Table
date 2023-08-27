@@ -5,6 +5,7 @@ import openpyxl
 import math
 import os
 import tabula
+import pandas as pd
 
 #Проход по страницам
 #<-------------------
@@ -29,14 +30,14 @@ with open("54564-54566.pdf", 'rb') as file:
     for page_num in range(1):
         
         #сразуже номер для проверки
-        page_num = 2
+        page_num = 11
         send = []   
 
 #<-------------------
 
 #<1@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # название столбцов 
-        send1 = ['CUSTOMER', 'Cust Code', 'VAT NO', 'NO', 'Date', 'Page', 'ITEM Code', 'DESCRIPTION', 'COMPOSITION','COUNTRY OF ORIGIN',	'CUSTOMS CODE (H.S.)','SIZE', 'U.M', 'QTY', 'UNIT PRICE','VALUE','', 'C.I']
+        send1 = ['CUSTOMER', 'Cust Code', 'VAT NO', 'NO', 'Date', 'Page', 'ITEM Code', 'DESCRIPTION', 'COMPOSITION','COUNTRY OF ORIGIN',	'CUSTOMS CODE (H.S.)','SIZE', 'U.M', 'QTY', 'UNIT PRICE','VALUE', 'C.I']
 
         # Вычисляем номер последней строки в таблице
         last_row = worksheet.max_row + 1
@@ -341,17 +342,19 @@ with open("54564-54566.pdf", 'rb') as file:
                         
                              # обработка этой строки на нужные слова !!!!!  - не учитывапется если нет sole
                             my_list = send_y1[i][j][k].split('Country of origin:')
-                            if len(my_list)== 1: 
+                            if len(my_list) == 1: 
                                 my_list = my_list[0].split('H. S  :')
                             if len(my_list) > 1: 
-                                my_list = my_list[1].split('H. S  :')
+                                my_list = my_list[1].split('H. S')
                             
                             if len(my_list) == 2:
                                 worksheet['J' + str(row_index)] = my_list[0].replace(" ", "")
-                                worksheet['K' + str(row_index)] = my_list[1].replace(" ", "")
+                                #oтделяем по :
+                                hs = str(my_list[1].replace(":", "")) 
+                                worksheet['K' + str(row_index)] = hs.replace(" ", "")
                                 code = my_list[1].replace(" ", "")
                             if len(my_list) != 2:
-                                worksheet['J' + str(row_index)] = my_list[0].replace(" ", "")
+                                worksheet['J' + str(row_index)] = my_list[0].replace(" ", "", ":")
                             
                             if cdvig == 2:
                                 description = send_y1[i][j-2][k]
@@ -415,7 +418,11 @@ with open("54564-54566.pdf", 'rb') as file:
                                 #проверка на нан , часто пападается (это работает если столбец не пустой проверки!)
                                 if str(send_y1[i][j][k]) == 'nan':
                                     nuzno = False
-                                    
+                                
+                                #проверка на содеражание буквы 
+                                buka = str(send_y1[i][j][k])
+                                if any(c.isalpha() for c in buka):
+                                    nuzno = False
                           
 
                     #если подходит отсылаем 
@@ -429,11 +436,296 @@ with open("54564-54566.pdf", 'rb') as file:
         
 #<-5--SIZE-end-------------        
         
+#<-U.M--------------
+        #сканируем участок 
+        um = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 45, 69, 53))
+        #то что отсканируем переводим в массив
+        send_y1 = np.array(um)
+        #print(send_y1)
+        #print(sole_mas)
+        #c какой стороки начинаем 
+        row_index = cdvig
+
+        #проверка на сдвиг
+        if cdvig == 2:
+            nachalo = 0
+        else:
+            nachalo = 1
+
+        #проверка нет ли sole 
+        y1 = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(22, 0, 69, 11))
+        send_y1 = np.array(y1)
         
+        #провверка не другой ли формат $$$$$
+        if not y1:
+            stvig = 1
+        else:
+            stvig = 2
+
+        #проверка на то что мы отсканировали нужно ли вставлять 
+        nuzno = True
+        # Проходим по каждому элементу массива отсканированному 
+        for i in range(len(send_y1)):
+            for j in range(nachalo, len(send_y1[i]), stvig):
+                for k in range(len(send_y1[i][j])):
+
+                    #проверка на пустой     
+                    if send_y1[i][j][k] is  None:
+                        j += 1
+
+                    #проверка на нан , часто пападается (это работает если столбец не пустой проверки!)
+                    if str(send_y1[i][j][k]) == 'nan':
+                        j += 1
+                    
+ 
+                    worksheet['M' + str(row_index)] = send_y1[i][j][k]
+                     # увеличение индекса строки на 1
+                    row_index += 1
+                    #обновляем значение
+                    
         
+#<-U.M-end-------------          
         
+#<-QTY--------------
+        #сканируем участок 
+        qty = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 50, 72, 65))
+        #то что отсканируем переводим в массив
+        send_y1 = np.array(qty)
         
+        #print(send_y1)
+        #c какой стороки начинаем 
+        row_index = cdvig
+
+        #проверка на то что мы отсканировали нужно ли вставлять 
+        nuzno = True
+        # Проходим по каждому элементу массива отсканированному 
+        for i in range(len(send_y1)):
+            for j in range(len(send_y1[i])):
+                for k in range(len(send_y1[i][j])):
+           
+                    #проходим по массиву проверки и сравниваем 
+                    for x in range(len(sole_mas)):
+                        for y in range(len(sole_mas[x])):
+
+
+                            send_delet = str(send_y1[i][j][k]).split(' ')
+                            #проходимся по строке элемента сканера                             
+                            for z in range(len(send_delet)):
+                                #print("Мой массив внизу")
+                                #print(send_delet[z])
+                                #print("Проверяющий массив внизу")
+                                #print(sole_mas[x][y])
+                                #проверка не совпадает ли с массивом проверки 
+                                if sole_mas[x][y] == send_delet[z]:
+                                    nuzno = False
+                                #проверка на пустой     
+                                if send_y1[i][j][k] is  None:
+                                    nuzno = False
+                                
+                                #проверка на нан , часто пападается (это работает если столбец не пустой проверки!)
+                                if str(send_y1[i][j][k]) == 'nan':
+                                    nuzno = False
+                                 #проверка на содеражание буквы 
+                                buka = str(send_y1[i][j][k])
+                                if any(c.isalpha() for c in buka):
+                                    nuzno = False  
+                          
+
+                    #если подходит отсылаем 
+                    if  nuzno  == True:
+                        worksheet['N' + str(row_index)] = send_y1[i][j][k]
+                         # увеличение индекса строки на 1
+                        row_index += 1
+                    #обновляем значение
+                    nuzno  = True
+                           
         
+#<-QTY-end-------------         
         
+#<-UNIT PRICE--------------
+        #сканируем участок 
+        qty = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 60, 72, 75))
+        #то что отсканируем переводим в массив
+        send_y1 = np.array(qty)
+        
+        #print(send_y1)
+        #c какой стороки начинаем 
+        row_index = cdvig
+
+        #проверка на то что мы отсканировали нужно ли вставлять 
+        nuzno = True
+        # Проходим по каждому элементу массива отсканированному 
+        for i in range(len(send_y1)):
+            for j in range(len(send_y1[i])):
+                for k in range(len(send_y1[i][j])):
+           
+                    #проходим по массиву проверки и сравниваем 
+                    for x in range(len(sole_mas)):
+                        for y in range(len(sole_mas[x])):
+
+
+                            send_delet = str(send_y1[i][j][k]).split(' ')
+                            #проходимся по строке элемента сканера                             
+                            for z in range(len(send_delet)):
+                                #print("Мой массив внизу")
+                                #print(send_delet[z])
+                                #print("Проверяющий массив внизу")
+                                #print(sole_mas[x][y])
+                                #проверка не совпадает ли с массивом проверки 
+                                if sole_mas[x][y] == send_delet[z]:
+                                    nuzno = False
+                                #проверка на пустой     
+                                if send_y1[i][j][k] is  None:
+                                    nuzno = False
+                                
+                                #проверка на нан , часто пападается (это работает если столбец не пустой проверки!)
+                                if str(send_y1[i][j][k]) == 'nan':
+                                    nuzno = False
+                                
+                                #проверка на содеражание буквы 
+                                buka = str(send_y1[i][j][k])
+                                if any(c.isalpha() for c in buka):
+                                    nuzno = False
+                                
+                                    
+                          
+
+                    #если подходит отсылаем 
+                    if  nuzno  == True:
+                        worksheet['O' + str(row_index)] = send_y1[i][j][k]
+                         # увеличение индекса строки на 1
+                        row_index += 1
+                    #обновляем значение
+                    nuzno  = True
+                           
+        
+#<-UNIT PRICE-end-------------        
+        
+#<-VALUE--------------
+        #сканируем участок 
+        qty = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 76, 69, 89))
+        #то что отсканируем переводим в массив
+        send_y1 = np.array(qty)
+        
+        #print(send_y1)
+        #c какой стороки начинаем 
+        row_index = cdvig
+
+        #проверка на то что мы отсканировали нужно ли вставлять 
+        nuzno = True
+        # Проходим по каждому элементу массива отсканированному 
+        for i in range(len(send_y1)):
+            for j in range(len(send_y1[i])):
+                for k in range(len(send_y1[i][j])):
+           
+                    #проходим по массиву проверки и сравниваем 
+                    for x in range(len(sole_mas)):
+                        for y in range(len(sole_mas[x])):
+
+
+                            send_delet = str(send_y1[i][j][k]).split(' ')
+                            #проходимся по строке элемента сканера                             
+                            for z in range(len(send_delet)):
+                                #print("Мой массив внизу")
+                                #print(send_delet[z])
+                                #print("Проверяющий массив внизу")
+                                #print(sole_mas[x][y])
+                                #проверка не совпадает ли с массивом проверки 
+                                if sole_mas[x][y] == send_delet[z]:
+                                    nuzno = False
+                                #проверка на пустой     
+                                if send_y1[i][j][k] is  None:
+                                    nuzno = False
+                                
+                                #проверка на нан , часто пападается (это работает если столбец не пустой проверки!)
+                                if str(send_y1[i][j][k]) == 'nan':
+                                    nuzno = False
+                                
+                                #проверка на содеражание буквы 
+                                buka = str(send_y1[i][j][k])
+                                if any(c.isalpha() for c in buka):
+                                    nuzno = False
+                                
+                                    
+                          
+
+                    #если подходит отсылаем 
+                    if  nuzno  == True:
+                        worksheet['P' + str(row_index)] = send_y1[i][j][k]
+                         # увеличение индекса строки на 1
+                        row_index += 1
+                    #обновляем значение
+                    nuzno  = True
+                           
+        
+#<-VALUE-end-------------
+
+#<-C.I--------------
+        #сканируем участок 
+        column_names = ["CI"]
+        ci = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= page_num, relative_area = True, area=(21, 87, 69, 94))
+        #то что отсканируем переводим в массив
+        send_y1 = np.array(ci)
+        #проверка на то что мы отсканировали нужно ли вставлять 
+        nuzno = True
+        #ищем заголовок 
+        df = pd.DataFrame(ci[0])
+        
+        # получаем название столбца
+        column_name = df.columns[0]
+
+        #обработка названия столбца 
+        if any(c.isalpha() for c in column_name):
+            row_index = cdvig
+        else:
+            worksheet['Q' + str(cdvig)] = column_name
+            row_index = cdvig + 1
+        
+        # Проходим по каждому элементу массива отсканированному 
+        for i in range(len(send_y1)):
+            for j in range(len(send_y1[i])):
+                for k in range(len(send_y1[i][j])):
+           
+                    #проходим по массиву проверки и сравниваем 
+                    for x in range(len(sole_mas)):
+                        for y in range(len(sole_mas[x])):
+
+
+                            send_delet = str(send_y1[i][j][k]).split(' ')
+                            #проходимся по строке элемента сканера                             
+                            for z in range(len(send_delet)):
+                                #print("Мой массив внизу")
+                                #print(send_delet[z])
+                                #print("Проверяющий массив внизу")
+                                #print(sole_mas[x][y])
+                                #проверка не совпадает ли с массивом проверки 
+                                if sole_mas[x][y] == send_delet[z]:
+                                    nuzno = False
+                                #проверка на пустой     
+                                if send_y1[i][j][k] is  None:
+                                    nuzno = False
+                                
+                                #проверка на нан , часто пападается (это работает если столбец не пустой проверки!)
+                                if str(send_y1[i][j][k]) == 'nan':
+                                    nuzno = False
+                                
+                                #проверка на содеражание буквы 
+                                buka = str(send_y1[i][j][k])
+                                if any(c.isalpha() for c in buka):
+                                    nuzno = False
+                                
+                                    
+                          
+
+                    #если подходит отсылаем 
+                    if  nuzno  == True:
+                        worksheet['Q' + str(row_index)] = send_y1[i][j][k]
+                         # увеличение индекса строки на 1
+                        row_index += 1
+                    #обновляем значение
+                    nuzno  = True
+                           
+        
+#<-C.I-end-------------
         # Сохраняем файл
         workbook.save(path)
