@@ -9,9 +9,11 @@ import pandas as pd
 
 #Проход по страницам
 #<-------------------
-#file = "54564-54566.pdf"
+
+file = "54564-54566.pdf"
 #file = "Example.pdf"
 #file = "2.pdf"
+
 
 def fromPDftoExelspec(file):
 
@@ -22,8 +24,10 @@ def fromPDftoExelspec(file):
 
         page_number = len(pdf_reader.pages)
         
-        for page_num in range(1,(len(pdf_reader.pages) + 1)):
+        for page_num in range(1):
+        #for page_num in range(1,(len(pdf_reader.pages) + 1)):
             
+            page_num = 3
             #path = "file2.xlsx"
             path = 'scan_'+str(page_num)+'.xlsx'
     
@@ -49,7 +53,7 @@ def fromPDftoExelspec(file):
     
     #<1@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     # название столбцов 
-            send1 = ['CUSTOMER', 'Cust Code', 'VAT NO', 'NO', 'Date', 'Page', 'ITEM Code', 'DESCRIPTION', 'COMPOSITION','COUNTRY OF ORIGIN',	'CUSTOMS CODE (H.S.)','SIZE', 'U.M', 'QTY', 'UNIT PRICE','VALUE', 'C.I']
+            send1 = ['CUSTOMER', 'Cust Code', 'VAT NO', 'NO', 'Date', 'Page', 'ITEM Code', 'DESCRIPTION', 'COMPOSITION','COUNTRY OF ORIGIN',	'CUSTOMS CODE (H.S.)','SIZE', 'U.M', 'QTY', 'UNIT PRICE','VALUE', 'C.I', '% DISCOUNT',	'GROSS VALUE',	'NET VALUE',	'ADVANCE', 	'TOTAL VALUE',	'TOTAL INVOICE',	'TOTAL AMOUNT DUE',	'PACKAGING NUMBER',	'GROSS WEIGHT', 'NET WEIGHT', 'VOLUME']
     
             # Вычисляем номер последней строки в таблице
             last_row = worksheet.max_row + 1
@@ -181,10 +185,10 @@ def fromPDftoExelspec(file):
                 if len(send_CUST[0][0]) == 3:
                     worksheet['E2'] = send_CUST[0][0][1]
                     worksheet['F2'] = send_CUST[0][0][2]
-                if len(send_CUST[0][0]) == 2 and send_CUST[0][0] == '54564':
+                if len(send_CUST[0][0]) == 2 and send_CUST[0][0][0] == '54564':
                     worksheet['E2'] = send_CUST[0][0][1]
                     worksheet['F2'] = send_CUST[0][0][2]
-                if len(send_CUST[0][0]) == 1 and send_CUST[0][0] == '54564':
+                if len(send_CUST[0][0]) == 1 and send_CUST[0][0][0] == '54564':
                     worksheet['E2'] = send_CUST[0][0][1]
                     
             
@@ -502,7 +506,7 @@ def fromPDftoExelspec(file):
             
     #<-QTY--------------
             #сканируем участок 
-            qty = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 50, 72, 65))
+            qty = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 50, 72, 61))
             #то что отсканируем переводим в массив
             send_y1 = np.array(qty)
             
@@ -558,7 +562,7 @@ def fromPDftoExelspec(file):
             
     #<-UNIT PRICE--------------
             #сканируем участок 
-            qty = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 60, 72, 75))
+            qty = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 60, 71, 72))
             #то что отсканируем переводим в массив
             send_y1 = np.array(qty)
             
@@ -617,7 +621,7 @@ def fromPDftoExelspec(file):
             
     #<-VALUE--------------
             #сканируем участок 
-            qty = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 76, 69, 89))
+            qty = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 77, 69, 89))
             #то что отсканируем переводим в массив
             send_y1 = np.array(qty)
             
@@ -747,10 +751,289 @@ def fromPDftoExelspec(file):
                                
             
     #<-C.I-end-------------
+
+#2part------------@@@**************************************
+
+
+#<-GROSS VALUE--------------
+
+             #сканируем область       
+            gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(67, 0, 70, 15))        
+            
+            #проверка если место будет пустое 
+            #CUSTOMER = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+            
+            #делаем из отосланного массив
+            send_CUST = np.array(gv)
+    
+            my_value = ''
+    
+            # проход по элементам массива и добавление каждого элемента в строку
+            for i in range(len(send_CUST)):
+                for j in range(len(send_CUST[i])):
+                    for k in range(len(send_CUST[i][j])):
+                        #print (send_CUST[i][j][k])
+                        my_value = str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+    
+            #добовляем значение
+            worksheet['S2'] = my_value
+
+#<-GROSS VALUE-end-------------
+
+#<-% DISCOUNT--------------
+
+             #сканируем область       
+            gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(67, 16, 70, 20))        
+            
+            #проверка если место будет пустое 
+            #CUSTOMER = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+            
+            #делаем из отосланного массив
+            send_CUST = np.array(gv)
+    
+            my_value = ''
+
+            # проход по элементам массива и добавление каждого элемента в строку
+            for i in range(len(send_CUST)):
+                for j in range(len(send_CUST[i])):
+                    for k in range(len(send_CUST[i][j])):
+                        #print (send_CUST[i][j][k])
+                        my_value = str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+    
+            #добовляем значение
+            worksheet['R2'] = my_value
+
+#<-% DISCOUNT-end-------------
+
+#<-% NET VALUE--+Disc Value------------
+
+             #сканируем область    Disc Value   
+            #gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(67, 21, 70, 35))        
+            
+            #сканируем область       
+            gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(67, 36, 70, 49))        
+            
+            #проверка если место будет пустое 
+            #CUSTOMER = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+            
+            #делаем из отосланного массив
+            send_CUST = np.array(gv)
+    
+            my_value = ''
+
+            # проход по элементам массива и добавление каждого элемента в строку
+            for i in range(len(send_CUST)):
+                for j in range(len(send_CUST[i])):
+                    for k in range(len(send_CUST[i][j])):
+                        #print (send_CUST[i][j][k])
+                        my_value = str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+    
+            #добовляем значение
+            worksheet['T2'] = my_value
+
+#<-% NET VALUE-end-------------
+
+#<-% ADVANCE --------------
+
+                
+            
+            #сканируем область       
+            gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(67, 75, 70, 85))        
+            
+            #проверка если место будет пустое 
+            #CUSTOMER = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+            
+            #делаем из отосланного массив
+            send_CUST = np.array(gv)
+    
+            my_value = ''
+
+            # проход по элементам массива и добавление каждого элемента в строку
+            for i in range(len(send_CUST)):
+                for j in range(len(send_CUST[i])):
+                    for k in range(len(send_CUST[i][j])):
+                        #print (send_CUST[i][j][k])
+                        my_value = str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+    
+            #добовляем значение
+            worksheet['U2'] = my_value
+
+#<-% ADVANCE -end-------------
+
+#<-% PACKAGING NUMBER --------------
+
+                
+            
+            #сканируем область       
+            #gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(72, 0, 80, 94))        
+            gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(81, 0, 85, 7))        
+            
+            #проверка если место будет пустое 
+            #CUSTOMER = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+            
+            #делаем из отосланного массив
+            send_CUST = np.array(gv)
+    
+            my_value = ''
+
+            # проход по элементам массива и добавление каждого элемента в строку
+            for i in range(len(send_CUST)):
+                for j in range(len(send_CUST[i])):
+                    for k in range(len(send_CUST[i][j])):
+                        #print (send_CUST[i][j][k])
+                        my_value = str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+    
+            #добовляем значение
+            worksheet['Y2'] = my_value
+
+#<-% PACKAGING NUMBER -end-------------
+
+#<-% GROSS WEIGHT --------------
+
+                
+            
+            #сканируем область       
+            #gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(72, 0, 80, 94))        
+            gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(81, 27, 85, 40) )       
+            
+            #проверка если место будет пустое 
+            #CUSTOMER = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+            
+            #делаем из отосланного массив
+            send_CUST = np.array(gv)
+    
+            my_value = ''
+
+            # проход по элементам массива и добавление каждого элемента в строку
+            for i in range(len(send_CUST)):
+                for j in range(len(send_CUST[i])):
+                    for k in range(len(send_CUST[i][j])):
+                        #print (send_CUST[i][j][k])
+                        my_value = str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+    
+            #добовляем значение
+            worksheet['Z2'] = my_value
+
+#<-% GROSS WEIGHT -end-------------
+
+#<-% GROSS WEIGHT --------------
+
+                
+            
+            #сканируем область       
+            #gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(72, 0, 80, 94))        
+            gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(81, 27, 85, 40) )       
+            
+            #проверка если место будет пустое 
+            #CUSTOMER = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+            
+            #делаем из отосланного массив
+            send_CUST = np.array(gv)
+    
+            my_value = ''
+
+            # проход по элементам массива и добавление каждого элемента в строку
+            for i in range(len(send_CUST)):
+                for j in range(len(send_CUST[i])):
+                    for k in range(len(send_CUST[i][j])):
+                        #print (send_CUST[i][j][k])
+                        my_value = str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+    
+            #добовляем значение
+            worksheet['Z2'] = my_value
+
+#<-% GROSS WEIGHT -end-------------
+
+#<-% NET WEIGHT --------------
+'''
+                
+            
+            #сканируем область       
+            #gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(72, 0, 80, 94))        
+            gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(81, 27, 85, 60) )       
+            
+            #проверка если место будет пустое 
+            #CUSTOMER = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+            
+            #делаем из отосланного массив
+            send_CUST = np.array(gv)
+    
+            my_value = ''
+
+            my_list = []
+
+            # проход по элементам массива и добавление каждого элемента в строку
+            for i in range(len(send_CUST)):
+                for j in range(len(send_CUST[i])):
+                    for k in range(len(send_CUST[i][j])):
+                        my_value = str(send_CUST[i][j][k])
+                        print (my_value)
+                       
+                        if str(send_y1[i][j][k]) == 'nan':
+                            pass
+                        else:
+                            my_list.append(send_y1[i][j][k])
+
+                        #print (send_CUST[i][j][k])
+                        #my_value = str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+                        
+                        #просматриваем трайной массив и отправляем его по частям 
+            if not my_list:
+                pass
+            else:
+                if len(send_CUST[0][0]) == 3:
+                    worksheet['AA2'] = send_CUST[0][0][1]
+                    worksheet['AB2'] = send_CUST[0][0][2]
+                if len(send_CUST[0][0]) == 2 and send_CUST[0][0][0] == my_value:
+                    worksheet['AA2'] = send_CUST[0][0][1]
+                    
+                if len(send_CUST[0][0]) == 1 and send_CUST[0][0] == my_value:
+                    pass
+                else:
+                    worksheet['AA2'] = send_CUST[0][0][0]
+                            
+
+'''   
+            #добовляем значение
+            #worksheet['AA2'] = my_value
+
+#<-% NET WEIGHT -end-------------
+
+#<-% VOLUME --------------
+'''
+                
+            
+            #сканируем область       
+            #gv = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(72, 0, 80, 94))        
+            vol = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(81, 27, 85, 60) )       
+            
+            #проверка если место будет пустое 
+            #CUSTOMER = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+            
+            #делаем из отосланного массив
+            send_CUST = np.array(vol)
+    
+            my_value = ''
+
+            # проход по элементам массива и добавление каждого элемента в строку
+            for i in range(len(send_CUST)):
+                for j in range(len(send_CUST[i])):
+                    for k in range(len(send_CUST[i][j])):
+                        #print (send_CUST[i][j][k])
+                        my_value = str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+    
+            #добовляем значение
+            #worksheet['AB2'] = my_value
+
+#<-% VOLUME -end-------------
+
             # Сохраняем файл
             workbook.save(path)
             workbook.close()
+'''
 
 #----------------------------main 
 
-#fromPDftoExelspec(file)
+
+
+fromPDftoExelspec(file)

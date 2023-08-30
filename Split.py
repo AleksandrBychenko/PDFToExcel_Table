@@ -10,4 +10,5 @@ my_list = my_string.split(my_word)
 # Соединяем список обратно в строку
 new_string = "".join(my_list)
 
+
 print(new_string)
