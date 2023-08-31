@@ -16,6 +16,8 @@ file = "54564-54566.pdf"
 
 
 def fromPDftoExelspec(file):
+    # Вычисляем номер последней строки в таблице
+    last_row = 2
 
 # открываем пдф и проходим по страницам 
     with open(file, 'rb') as file:
@@ -24,12 +26,69 @@ def fromPDftoExelspec(file):
 
         page_number = len(pdf_reader.pages)
         
-        for page_num in range(1):
+        #начаьные страницы ?????????????
+                     #сканируем область      
+        nO = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = 1, relative_area = True,area=(15, 23, 20, 30))        
+        
+        #проверка если место будет пустое 
+        #Cust_Code = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+        
+        #делаем из отосланного массив
+        send_CUST = np.array(nO)
+    
+        # создание пустой строки
+        my_str= ''
+    
+        # проход по элементам массива и добавление каждого элемента в строку
+        for i in range(len(send_CUST)):
+            for j in range(len(send_CUST[i])):
+                for k in range(len(send_CUST[i][j])):
+                    my_str += str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+    
+        
+        ####### end check ::::::::
+
+        
+        #path = "file2.xlsx"
+        path_you  = 'scan_'+str(my_str)+'.xlsx'
+        #???????????????
+
+        for page_num in range(1,5):
         #for page_num in range(1,(len(pdf_reader.pages) + 1)):
+            #page_num = 3
+
+            #####Проверка на номер строки  ::::::::::::::::::::::::
+                        #сканируем область      
+             #сканируем область      
+            nO = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(15, 23, 20, 30))        
             
-            page_num = 3
+            #проверка если место будет пустое 
+            #Cust_Code = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(3, 4, 5, 6))        
+            
+            #делаем из отосланного массив
+            send_CUST = np.array(nO)
+    
+            # создание пустой строки
+            my_str= ''
+    
+            # проход по элементам массива и добавление каждого элемента в строку
+            for i in range(len(send_CUST)):
+                for j in range(len(send_CUST[i])):
+                    for k in range(len(send_CUST[i][j])):
+                        my_str += str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
+    
+            
+            ####### end check ::::::::
+
+            
             #path = "file2.xlsx"
-            path = 'scan_'+str(page_num)+'.xlsx'
+            path = 'scan_'+str(my_str)+'.xlsx'
+
+            if  path_you != path:
+                last_row = 2
+                path_you = path
+            else:
+                pass
     
             if os.path.exists(path):
                 # Открываем файл Excel
@@ -37,26 +96,26 @@ def fromPDftoExelspec(file):
             else:
                 # Создаем новый файл Excel
                 workbook = openpyxl.Workbook()
-                workbook.save(path)
+                #workbook.save(path)
              
                  # Получаем активный лист
             worksheet = workbook.active
     
              # Очищаем содержимое листа
-            worksheet.delete_rows(1, worksheet.max_row)
+            #worksheet.delete_rows(1, worksheet.max_row)
     
             #сразуже номер для проверки
             #page_num = 11
             send = []   
-    
+            # Вычисляем номер последней строки в таблице
+            #last_row = worksheet.max_row + 1
     #<-------------------
     
     #<1@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     # название столбцов 
             send1 = ['CUSTOMER', 'Cust Code', 'VAT NO', 'NO', 'Date', 'Page', 'ITEM Code', 'DESCRIPTION', 'COMPOSITION','COUNTRY OF ORIGIN',	'CUSTOMS CODE (H.S.)','SIZE', 'U.M', 'QTY', 'UNIT PRICE','VALUE', 'C.I', '% DISCOUNT',	'GROSS VALUE',	'NET VALUE',	'ADVANCE', 	'TOTAL VALUE',	'TOTAL INVOICE',	'TOTAL AMOUNT DUE',	'PACKAGING NUMBER',	'GROSS WEIGHT', 'NET WEIGHT', 'VOLUME']
     
-            # Вычисляем номер последней строки в таблице
-            last_row = worksheet.max_row + 1
+
     
             # Добавляем название столбцов 
             for i in range(len(send1)):
@@ -88,7 +147,9 @@ def fromPDftoExelspec(file):
                         my_str += str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
     
             #добовляем значение
-            worksheet['A2'] = my_str
+            #row_numb = str(last_row)
+            row_numb = 2
+            worksheet['A'+ str(row_numb)] = my_str
      
     #<2Castomeer-end--------------------------------
     
@@ -112,7 +173,9 @@ def fromPDftoExelspec(file):
                         my_str += str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
     
             #добовляем значение
-            worksheet['B2'] = my_str
+            #row_numb = str(last_row)
+            row_numb = 2
+            worksheet['B' + str(row_numb)] = my_str
      
     #<Cust Code-end--------------------------------
     
@@ -136,7 +199,9 @@ def fromPDftoExelspec(file):
                         my_str += str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
     
             #добовляем значение
-            worksheet['C2'] = my_str
+            #row_numb = str(last_row)
+            row_numb = 2
+            worksheet['C' +str(row_numb)] = my_str
      
     #<VAT NO-end--------------------------------
     
@@ -161,7 +226,9 @@ def fromPDftoExelspec(file):
                         my_str += str(send_CUST[i][j][k]) # добавляем каждый элемент в конец строки
     
             #добовляем значение
-            worksheet['D2'] = my_str
+            #row_numb = str(last_row)
+            row_numb = 2
+            worksheet['D' + str(row_numb)] = my_str
             No = my_str
      
     #<NO-end--------------------------------
@@ -177,19 +244,23 @@ def fromPDftoExelspec(file):
             
             #делаем из отосланного массив
             send_CUST = np.array(date)
+
+            # обозначаем номер строчки 
+            #row_numb = str(last_row)
+            row_numb = 2
     
             #просматриваем трайной массив и отправляем его по частям 
             if not date:
                 pass
             else:
                 if len(send_CUST[0][0]) == 3:
-                    worksheet['E2'] = send_CUST[0][0][1]
-                    worksheet['F2'] = send_CUST[0][0][2]
+                    worksheet['E' + str(row_numb)] = send_CUST[0][0][1]
+                    worksheet['F' + str(row_numb)] = send_CUST[0][0][2]
                 if len(send_CUST[0][0]) == 2 and send_CUST[0][0][0] == '54564':
-                    worksheet['E2'] = send_CUST[0][0][1]
-                    worksheet['F2'] = send_CUST[0][0][2]
+                    worksheet['E' + str(row_numb)] = send_CUST[0][0][1]
+                    worksheet['F' + str(row_numb)] = send_CUST[0][0][2]
                 if len(send_CUST[0][0]) == 1 and send_CUST[0][0][0] == '54564':
-                    worksheet['E2'] = send_CUST[0][0][1]
+                    worksheet['E' + str(row_numb)] = send_CUST[0][0][1]
                     
             
     #<Date-Page-end--------------------------------
@@ -199,7 +270,7 @@ def fromPDftoExelspec(file):
             all = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 0, 69,0 + 110))
             send_all = np.array(all)
             sole =''
-            row_index = 2
+            row_index = last_row
             sole_mas = []
     
     
@@ -224,7 +295,7 @@ def fromPDftoExelspec(file):
     
     #<проверка на сдвиг-------- 
             #проверка сдвиг есть или нет относительно начала ITEM CODE
-            cdvig = 2
+            cdvig = last_row
             #сканируем область 
             y1 = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(22, 0, 69, 11))
             #записываем в массив 
@@ -249,9 +320,10 @@ def fromPDftoExelspec(file):
                                     if sole_mas[x][y] == send_delet[z]:
                                         
                                         if j == 0:
-                                            cdvig = 3
+                                            #3
+                                            cdvig = last_row + 1
                                         elif j == 1:
-                                            cdvig = 2
+                                            cdvig = last_row 
     
     
     #<проверка на сдвиг--end------ 
@@ -309,7 +381,7 @@ def fromPDftoExelspec(file):
             
             
             #c какой стороки начинаем 
-            row_index = 2
+            row_index = last_row 
     
             #проверка что есть элементы
             pusto = False
@@ -383,13 +455,17 @@ def fromPDftoExelspec(file):
                                         description = send_y1[i][j-2][k]
                                         description_send = description.split(code)
                                         worksheet['H' + str(row_index)] = description_send[0].replace(" ", "")
-    
-                                
                                 # увеличение индекса строки на 1 
                                 row_index += 1
+                            '''    
+                            if 'Deposit:' in str(send_y1[i][j][k]):
+                                    net_li = True
+                            '''
                         # возрощаем значение для проверки
                         nuzno  = True
-    
+                        
+
+                        '''
                         #провверка не другой ли формат $$$$$
                         if net_li == True:
                              #проверка на нан , часто пападается (это работает если столбец не пустой проверки!)
@@ -397,7 +473,9 @@ def fromPDftoExelspec(file):
                                 pass
                             else:
                                 worksheet['H' + str(row_index)] = send_y1[i][j][k]
-                                row_index += 1  
+                                row_index += 1
+                        '''        
+            net_li = False              
     
     #<DESCRIPTION-COMPOSITIO---COUNTRY OF ORIGIN----end-----
     
@@ -455,21 +533,6 @@ def fromPDftoExelspec(file):
     #<-5--SIZE-end-------------        
             
     #<-U.M--------------
-            #сканируем участок 
-            um = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 45, 69, 53))
-            #то что отсканируем переводим в массив
-            send_y1 = np.array(um)
-            #print(send_y1)
-            #print(sole_mas)
-            #c какой стороки начинаем 
-            row_index = cdvig
-    
-            #проверка на сдвиг
-            if cdvig == 2:
-                nachalo = 0
-            else:
-                nachalo = 1
-    
             #проверка нет ли sole 
             y1 = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(22, 0, 69, 11))
             send_y1 = np.array(y1)
@@ -479,12 +542,29 @@ def fromPDftoExelspec(file):
                 stvig = 1
             else:
                 stvig = 2
+
+            #сканируем участок 
+            um = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 45, 69, 53))
+            #то что отсканируем переводим в массив
+            send_y1 = np.array(um)
+            #print(send_y1)
+            #print(sole_mas)
+            #c какой стороки начинаем 
+            row_index = cdvig
+            '''
+            #проверка на сдвиг
+            if cdvig == 2:
+                nachalo = 0
+            else:
+                nachalo = 1
     
-            #проверка на то что мы отсканировали нужно ли вставлять 
+    
+            #проверка на то что мы отсканировали нужно ли вставлять nachalo, len(send_y1[i]), stvig 
             nuzno = True
             # Проходим по каждому элементу массива отсканированному 
             for i in range(len(send_y1)):
                 for j in range(nachalo, len(send_y1[i]), stvig):
+                
                     for k in range(len(send_y1[i][j])):
     
                         #проверка на пустой     
@@ -500,7 +580,9 @@ def fromPDftoExelspec(file):
                          # увеличение индекса строки на 1
                         row_index += 1
                         #обновляем значение
-                        
+            '''
+            lenn  = len(send_y1[0]) - 1
+            worksheet['M' + str(row_index)] = send_y1[0][lenn][0]            
             
     #<-U.M-end-------------          
             
@@ -943,6 +1025,10 @@ def fromPDftoExelspec(file):
             worksheet['Z2'] = my_value
 
 #<-% GROSS WEIGHT -end-------------
+            last_row = worksheet.max_row + 1
+            # Сохраняем файл
+            workbook.save(path)
+            workbook.close()
 
 #<-% NET WEIGHT --------------
 '''
@@ -1024,13 +1110,11 @@ def fromPDftoExelspec(file):
     
             #добовляем значение
             #worksheet['AB2'] = my_value
-
+'''
 #<-% VOLUME -end-------------
 
-            # Сохраняем файл
-            workbook.save(path)
-            workbook.close()
-'''
+#прр
+
 
 #----------------------------main 
 
