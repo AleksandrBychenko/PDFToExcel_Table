@@ -19,6 +19,11 @@ def fromPDftoExelspec(file):
     # Вычисляем номер последней строки в таблице
     last_row = 2
 
+    #весь столбик 
+    full_um = []
+
+    # начальное значение предыдущегог числа на рандом выставил 
+    preded = str(2)
 # открываем пдф и проходим по страницам 
     with open(file, 'rb') as file:
         
@@ -87,6 +92,8 @@ def fromPDftoExelspec(file):
             if  path_you != path:
                 last_row = 2
                 path_you = path
+                #весь столбик 
+                full_um = []
             else:
                 pass
     
@@ -295,7 +302,7 @@ def fromPDftoExelspec(file):
     
     #<проверка на сдвиг-------- 
             #проверка сдвиг есть или нет относительно начала ITEM CODE
-            cdvig = last_row
+            cdvig = last_row + 1
             #сканируем область 
             y1 = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(22, 0, 69, 11))
             #записываем в массив 
@@ -382,15 +389,16 @@ def fromPDftoExelspec(file):
             
             #c какой стороки начинаем 
             row_index = last_row 
-    
+        
+
             #проверка что есть элементы
             pusto = False
     
             #разделитель для колонки описания 
             code =' '
     
-    
-    
+            #проверка на первый раз  использования
+            first_ras = True
     
             #проверка на то что мы отсканировали нужно ли вставлять 
             nuzno = True
@@ -426,8 +434,8 @@ def fromPDftoExelspec(file):
                         if  nuzno  == True:
                             #находим строчку со страной и от нее и скачим 
                             if   'Country' in str(send_y1[i][j][k]): 
-                               
-                            
+                                
+                                
                                  # обработка этой строки на нужные слова !!!!!  - не учитывапется если нет sole
                                 my_list = send_y1[i][j][k].split('Country of origin:')
                                 if len(my_list) == 1: 
@@ -441,20 +449,46 @@ def fromPDftoExelspec(file):
                                     hs = str(my_list[1].replace(":", "")) 
                                     worksheet['K' + str(row_index)] = hs.replace(" ", "")
                                     code = my_list[1].replace(" ", "")
-                                if len(my_list) != 2:
+                                    code = code.replace(":", "")
+                                if len(my_list) > 2:
                                     #!!!!!!!!!!!!!!!!
                                     hs = str(my_list[0].replace(":", ""))
                                     worksheet['J' + str(row_index)] = hs.replace(" ", "")
+                                    code = my_list[len(my_list) - 1].replace(" ", "")
+                                    code = code.replace(":", "")
                                 
-                                if cdvig == 2:
+                                if len(my_list) < 2:
+                                    #!!!!!!!!!!!!!!!!
+                                    hs = str(my_list[0].replace(":", ""))
+                                    worksheet['J' + str(row_index)] = hs.replace(" ", "")
+                                    code = my_list[0].replace(" ", "")
+                                    code = code.replace(":", "")
+                                
+                                #print(code)
+                                '''
+                                if cdvig == last_row:
                                     description = send_y1[i][j-2][k]
                                     description_send = description.split(code)
-                                    worksheet['H' + str(row_index)] = description_send[0].replace(" ", "")
+                                    
+                                    worksheet['H' + str(row_index)] = description_send[0]
                                 else:
-                                    if row_index != 2:
+                                    
+                                    if row_index != last_row:
                                         description = send_y1[i][j-2][k]
                                         description_send = description.split(code)
-                                        worksheet['H' + str(row_index)] = description_send[0].replace(" ", "")
+                                        worksheet['H' + str(row_index)] = description_send[0]
+                                '''
+                                description = send_y1[i][j-2][k]
+                                description_send = description.split(code)
+                                worksheet['H' + str(row_index)] = description_send[0]
+
+                                if first_ras and cdvig == last_row + 1:    
+                                    description = preded
+                                    description_send = description.split(code)
+                                    worksheet['H' + str(row_index)] = description_send[0] 
+                                    first_ras = False
+
+                                preded  =  send_y1[-1][-1][-1]                            
                                 # увеличение индекса строки на 1 
                                 row_index += 1
                             '''    
@@ -463,6 +497,7 @@ def fromPDftoExelspec(file):
                             '''
                         # возрощаем значение для проверки
                         nuzno  = True
+                         
                         
 
                         '''
@@ -528,8 +563,7 @@ def fromPDftoExelspec(file):
                             row_index += 1
                         #обновляем значение
                         nuzno  = True
-                               
-            
+
     #<-5--SIZE-end-------------        
             
     #<-U.M--------------
@@ -551,6 +585,11 @@ def fromPDftoExelspec(file):
             #print(sole_mas)
             #c какой стороки начинаем 
             row_index = cdvig
+
+
+            #то что главное 
+            in_um = [] 
+
             '''
             #проверка на сдвиг
             if cdvig == 2:
@@ -581,9 +620,46 @@ def fromPDftoExelspec(file):
                         row_index += 1
                         #обновляем значение
             '''
-            lenn  = len(send_y1[0]) - 1
-            worksheet['M' + str(row_index)] = send_y1[0][lenn][0]            
+            #lenn  = len(send_y1[0]) - 1
+            #worksheet['M' + str(row_index)] = send_y1[0][lenn][0]            
+            #проверка на то что мы отсканировали нужно ли вставлять 
+            nuzno = False
+            # Проходим по каждому элементу массива отсканированному 
+            for i in range(len(send_y1)):
+                for j in range(len(send_y1[i])):
+                    for k in range(len(send_y1[i][j])):
+                        
+                        if nuzno  == False:
+                            full_um.append(send_y1[i][j][k])
+                        
+                        if '_' in send_y1[i][j][k]:
+                            nuzno = True
+
+    
+    
+                        #если подходит отсылаем 
+                        if  nuzno  == True:
+                            worksheet['M' + str(row_index)] = send_y1[i][j][k]
+                            in_um.append(send_y1[i][j][k])
+                             # увеличение индекса строки на 1
+                            row_index += 1
+                        #обновляем значение
+
+            #куда первая запись
+            zapis = 2
             
+            for i in range(len(full_um)):
+
+                for j in range(1, len(in_um)):
+
+                    if  in_um[j] == full_um[i]:
+                        worksheet['M' + str(zapis)] = full_um[i]
+                        zapis = zapis + 1
+            
+        
+
+
+
     #<-U.M-end-------------          
             
     #<-QTY--------------
@@ -1025,7 +1101,7 @@ def fromPDftoExelspec(file):
             worksheet['Z2'] = my_value
 
 #<-% GROSS WEIGHT -end-------------
-            last_row = worksheet.max_row + 1
+            last_row = worksheet.max_row
             # Сохраняем файл
             workbook.save(path)
             workbook.close()
