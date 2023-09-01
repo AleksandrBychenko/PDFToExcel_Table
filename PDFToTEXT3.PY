@@ -13,11 +13,13 @@ import pandas as pd
 #file = "54564-54566.pdf"
 #file = "Example.pdf"
 file = "2.pdf"
-
+page_num = 1
 
 def fromPDftoExelspec(file):
     # Вычисляем номер последней строки в таблице
     last_row = 2
+
+    
 
     #весь столбик 
     full_um = []
@@ -34,7 +36,7 @@ def fromPDftoExelspec(file):
         page_number = len(pdf_reader.pages)
         
         #начаьные страницы ?????????????
-                     #сканируем область      
+        #сканируем область      
         nO = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = 1, relative_area = True,area=(15, 23, 20, 30))        
         
         #проверка если место будет пустое 
@@ -57,16 +59,17 @@ def fromPDftoExelspec(file):
 
         
         #path = "file2.xlsx"
+        #создаем файл эксель
         path_you  = 'scan_'+str(my_str)+'.xlsx'
-        #???????????????
+        #???????????????до начала прочитываем первую страницу, чтобы можно было довать условие для названия фала экселя для проверки
 
         #for page_num in range(6,8):
         for page_num in range(1,(len(pdf_reader.pages) + 1)):
             #page_num = 3
 
             #####Проверка на номер строки  ::::::::::::::::::::::::
-                        #сканируем область      
-             #сканируем область      
+                
+            #сканируем область      
             nO = tabula.read_pdf(file, stream = True, multiple_tables = False, pages = page_num, relative_area = True,area=(15, 23, 20, 30))        
             
             #проверка если место будет пустое 
@@ -108,7 +111,7 @@ def fromPDftoExelspec(file):
                 workbook = openpyxl.Workbook()
                 #workbook.save(path)
              
-                 # Получаем активный лист
+            # Получаем активный лист
             worksheet = workbook.active
     
              # Очищаем содержимое листа
@@ -259,17 +262,17 @@ def fromPDftoExelspec(file):
             #row_numb = str(last_row)
             row_numb = 2
     
-            #просматриваем трайной массив и отправляем его по частям 
+            #просматриваем трайной массив и отправляем его по частям (!он не видет все в этой области 3 слова бодряд только)
             if not date:
                 pass
             else:
                 if len(send_CUST[0][0]) == 3:
                     worksheet['E' + str(row_numb)] = send_CUST[0][0][1]
                     worksheet['F' + str(row_numb)] = send_CUST[0][0][2]
-                if len(send_CUST[0][0]) == 2 and send_CUST[0][0][0] == '54564':
+                if len(send_CUST[0][0]) == 2 and send_CUST[0][0][0] == my_str:
                     worksheet['E' + str(row_numb)] = send_CUST[0][0][1]
                     worksheet['F' + str(row_numb)] = send_CUST[0][0][2]
-                if len(send_CUST[0][0]) == 1 and send_CUST[0][0][0] == '54564':
+                if len(send_CUST[0][0]) == 1 and send_CUST[0][0][0] == my_str:
                     worksheet['E' + str(row_numb)] = send_CUST[0][0][1]
                     
             
@@ -297,7 +300,7 @@ def fromPDftoExelspec(file):
             for i in range(len(send_all)):
                 for j in range(len(send_all[i])):
                     for k in range(len(send_all[i][j])):
-                # Проверяем наличие слова SOLE в элементе
+                # Проверяем наличие слова из 1 го столбца в нем и чтобы там был %
                             '''
                             if 'SOLE:' in str(send_all[i][j][k]):
                                 # Добавляем слово в строку
@@ -324,7 +327,7 @@ def fromPDftoExelspec(file):
     #<3SOLE:-end-----COMPOSITION----------------------------------------------
     
     #провверка не другой ли формат $$$$$
-            net_li = False
+            #net_li = False
     
     #<проверка на сдвиг-------- 
             #проверка сдвиг есть или нет относительно начала ITEM CODE
@@ -337,8 +340,8 @@ def fromPDftoExelspec(file):
             send_y1 = np.array(y1)
             
             #провверка не другой ли формат $$$$$
-            if not y1:
-                net_li = True
+            #if not y1:
+            #    net_li = True
     
                     # Проходим по каждому элементу массива
             for i in range(len(send_y1)):
@@ -357,7 +360,7 @@ def fromPDftoExelspec(file):
                                             cdvig = last_row + 1
                                         elif j == 1:
                                             cdvig = last_row 
-    
+
     
     #<проверка на сдвиг--end------ 
     
@@ -519,7 +522,7 @@ def fromPDftoExelspec(file):
                                 row_index += 1
                         '''        
             preded  =  send_y1[-1][-1][-1] 
-            net_li = False              
+            #net_li = False              
     
     #<DESCRIPTION-COMPOSITIO---COUNTRY OF ORIGIN----end-----
     
@@ -583,11 +586,12 @@ def fromPDftoExelspec(file):
             send_y1 = np.array(y1)
             
             #провверка не другой ли формат $$$$$
+            '''
             if not y1:
                 stvig = 1
             else:
                 stvig = 2
-
+            '''
             #сканируем участок 
             um = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 45, 69, 53))
             #то что отсканируем переводим в массив
@@ -871,7 +875,7 @@ def fromPDftoExelspec(file):
             nuzno = True
             
             row_index = cdvig
-    
+            # здесь станный скан 1 элемент видит только как название столбца, поэтому немногу меням!!
             if not ci:
                 pass
             else:
@@ -1221,4 +1225,4 @@ def fromPDftoExelspec(file):
 
 
 
-fromPDftoExelspec(file)
+#fromPDftoExelspec(file)
