@@ -10,12 +10,14 @@ import pandas as pd
 #Проход по страницам
 #<-------------------
 
-#file = "54564-54566.pdf"
+file = "54564-54566.pdf"
 #file = "Example.pdf"
-file = "2.pdf"
+#file = "2.pdf"
 page_num = 1
 
 def fromPDftoExelspec(file):
+    #jar_path = "C:\Users\byche\AppData\Local\Programs\Python\Python311\Lib\site-packages\tabula.tabula-1.0.5-jar-with-dependencies.jar"
+    #os.system(f"java -jar {jar_path}")
     # Вычисляем номер последней строки в таблице
     last_row = 2
 
@@ -95,6 +97,7 @@ def fromPDftoExelspec(file):
             path = 'scan_'+str(my_str)+'.xlsx'
 
             if  path_you != path:
+                print("File "+'scan_'+str(my_str)+'.xlsx'+" made!")
                 last_row = 2
                 path_you = path
                 #весь столбик 
@@ -1134,7 +1137,7 @@ def fromPDftoExelspec(file):
             # Сохраняем файл
             workbook.save(path)
             workbook.close()
-
+            print("Page is made: " + str(page_num))
 #<-% NET WEIGHT --------------
 '''
                 
