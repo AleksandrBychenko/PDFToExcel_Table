@@ -289,6 +289,11 @@ def fromPDftoExelspec(file):
             row_index = last_row
             sole_mas = []
 
+            #проверка сдвиг есть или нет относительно начала ITEM CODE
+            # сдвиг не работает!!!!
+            cdvig = last_row + 1
+            sole_is_last = False
+
             #проверка на % в строке     
             y1 = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(22, 0, 69, 11))
             send_y1 = np.array(y1)
@@ -325,6 +330,16 @@ def fromPDftoExelspec(file):
                                     sole_mas.append(new_array)
                                     row_index += 1
                                     ostan = True
+                                    if w == len(prov_sol) - 1:
+                                        sole_is_last = True 
+                                    
+                                    if w == 0:
+                                        #3
+                                        cdvig = last_row + 1
+                                    elif w == 1:
+                                        cdvig = last_row 
+                                    
+
                             ostan = False
             #print(sole_mas)
     #<3SOLE:-end-----COMPOSITION----------------------------------------------
@@ -332,7 +347,8 @@ def fromPDftoExelspec(file):
     #провверка не другой ли формат $$$$$
             #net_li = False
     
-    #<проверка на сдвиг-------- 
+    #<проверка на сдвиг--------
+            {''' 
             #проверка сдвиг есть или нет относительно начала ITEM CODE
             cdvig = last_row + 1
             #сканируем область 
@@ -364,7 +380,7 @@ def fromPDftoExelspec(file):
                                         elif j == 1:
                                             cdvig = last_row 
 
-    
+        '''}
     #<проверка на сдвиг--end------ 
     
     
@@ -501,6 +517,7 @@ def fromPDftoExelspec(file):
                                     worksheet['H' + str(row_index)] = description_send[0] 
                                     first_ras = False
 
+                                
 
                                 # увеличение индекса строки на 1 
                                 row_index += 1
@@ -1133,11 +1150,17 @@ def fromPDftoExelspec(file):
             worksheet['Z2'] = my_value
 
 #<-% GROSS WEIGHT -end-------------
-            last_row = worksheet.max_row
+            if sole_is_last:
+                last_row = worksheet.max_row + 1
+            else:
+                last_row = worksheet.max_row
             # Сохраняем файл
             workbook.save(path)
             workbook.close()
             print("Page is made: " + str(page_num))
+            if page_num == page_number:
+                print("File "+'scan_'+str(my_str)+'.xlsx'+" made!")
+                print("<------------------End--------------------->")
 #<-% NET WEIGHT --------------
 '''
                 
