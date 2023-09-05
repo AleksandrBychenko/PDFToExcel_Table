@@ -10,7 +10,8 @@ import pandas as pd
 #Проход по страницам
 #<-------------------
 
-file = "54564-54566.pdf"
+#file = "54564-54566.pdf"
+file = "RUSSL.pdf"
 #file = "Example.pdf"
 #file = "2.pdf"
 page_num = 1
@@ -281,13 +282,16 @@ def fromPDftoExelspec(file):
             
     #<Date-Page-end--------------------------------
     
-    #<3SOLE:--!!!! и дрогое--------------------------------------------------
+    #<3SOLE:--!!!! и другое--------------------------------------------------
             #1)Проходимся по всему участку 2) делаем массив исклучений sole_mas 3) добавляем Sole  
             all = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(21, 0, 69,0 + 110))
             send_all = np.array(all)
             sole =''
             row_index = last_row
             sole_mas = []
+            
+            #массив для проверки описания 
+            description_mas = []
 
             #проверка сдвиг есть или нет относительно начала ITEM CODE
             # сдвиг не работает!!!!
@@ -331,7 +335,9 @@ def fromPDftoExelspec(file):
                                     row_index += 1
                                     ostan = True
                                     if w == len(prov_sol) - 1:
-                                        sole_is_last = True 
+                                        sole_is_last = True
+                                    elif w == len(prov_sol) - 2:
+                                        sole_is_last = False 
                                     
                                     if w == 0:
                                         #3
@@ -435,11 +441,12 @@ def fromPDftoExelspec(file):
             y2 = tabula.read_pdf(file, stream = True, multiple_tables = False, pages= page_num, relative_area = True,area=(22, 11, 69, 41))
             #то что отсканируем переводим в массив
             send_y1 = np.array(y2)
-            
+            #print(send_y1)
             
             #c какой стороки начинаем 
             row_index = last_row 
-        
+
+
 
             #проверка что есть элементы
             pusto = False
@@ -449,6 +456,136 @@ def fromPDftoExelspec(file):
     
             #проверка на первый раз  использования
             first_ras = True
+    
+            #проверка на то что мы отсканировали нужно ли вставлять 
+            nuzno = True
+            # Проходим по каждому элементу массива отсканированному 
+            for i in range(len(send_y1)):
+                for j in range(len(send_y1[i])):
+                    for k in range(len(send_y1[i][j])):
+               
+                        #проходим по массиву проверки и сравниваем 
+                        for x in range(len(sole_mas)):
+                            for y in range(len(sole_mas[x])):
+    
+    
+                                send_delet = str(send_y1[i][j][k]).split(' ')
+                                #проходимся по строке элемента сканера                             
+                                for z in range(len(send_delet)):
+    
+                                    #проверка не совпадает ли с массивом проверки 
+                                    if sole_mas[x][y] == send_delet[z]:
+                                        nuzno = False
+                                        
+                                    #проверка на пустой     
+                                    if send_y1[i][j][k] is  None:
+                                        nuzno = False
+                                    
+                                    #проверка на нан , часто пападается (это работает если столбец не пустой проверки!)
+                                    if str(send_y1[i][j][k]) == 'nan':
+                                        nuzno = False
+                                        
+                              
+    
+                        #если подходит отсылаем 
+                        if  nuzno  == True:
+                            #находим строчку со страной и от нее и скачим 
+                            if   'Country' in str(send_y1[i][j][k]):
+                                
+                                my_list = send_y1[i][j][k].split('H. S')
+                                #print(my_list)
+                                if len(my_list) > 1:
+                                    hs  = str(my_list[1].replace(":", "")) 
+                                    #worksheet['K' + str(row_index)] = hs.replace(" ", "")
+                                    code = hs.replace(" ", "")
+                                else:
+                                    my_list = my_list[0].split('H.S')
+                                    if len(my_list) > 1:
+                                        hs  = str(my_list[1].replace(":", "")) 
+                                        #worksheet['K' + str(row_index)] = hs.replace(" ", "")
+                                        code = hs.replace(" ", "")
+
+                                start = send_y1[i][j][k].find('Country of origin:') + len('Country of origin:')
+                                end = send_y1[i][j][k].find('H.', start)
+
+                                if start != -1 and end != -1:
+                                    country = send_y1[i][j][k][start:end].strip()
+                                    cn = str(country.replace(" ", ""))
+                                    #worksheet['J' + str(row_index)] = cn
+                                
+                                if first_ras and cdvig == last_row + 1:    
+                                    description = preded
+                                    description_send = description.split(code)
+                                    #worksheet['H' + str(row_index)] = description_send[0] 
+                                    first_ras = False
+                                    description_mas.append(description)
+
+                                else:
+                                    description = send_y1[i][j-2][k]
+                                    description_send = description.split(code)
+                                    #if 'Country' not in send_y1[i][j-3][k]:
+                                        #print(send_y1[i][j-3][k])
+                                        #worksheet['H' + str(row_index)] = str(description_send[0] + ' ' + send_y1[i][j-3][k])
+                                    #else:
+                                        #worksheet['H' + str(row_index)] = description_send[0] 
+                                    first_ras = False
+                                    description_mas.append(description)
+
+                                # увеличение индекса строки на 1 
+                                row_index += 1
+                            {   ''' 
+                            else:
+                                if i == 0 and j == 0 and k == 0 and '-' not in send_y1[0][0][0] and cdvig == last_row + 1 :     
+                                    # Получаем значение из первой ячейки
+                                    cell_value = worksheet['H' + str(row_index - 1)].value
+
+                                    # Добавляем значение через пробел
+                                    worksheet['H' + str(row_index - 1)].value = cell_value + ' ' + 'новое значение'
+                                    #print("n99999" + str(send_y1[0][0][0]))
+                                #if (i + 1) != len and (j + 1) != 0 and (k + 1) != 0 and '-' not in send_y1[0][0][0] and cdvig == last_row + 1 :
+                            
+                                                      '''  }                            
+                            '''    
+                            if 'Deposit:' in str(send_y1[i][j][k]):
+                                    net_li = True
+                            '''
+                        # возрощаем значение для проверки
+                        nuzno  = True
+                         
+                        
+
+                        '''
+                        #провверка не другой ли формат $$$$$
+                        if net_li == True:
+                             #проверка на нан , часто пападается (это работает если столбец не пустой проверки!)
+                            if str(send_y1[i][j][k]) == 'nan':
+                                pass
+                            else:
+                                worksheet['H' + str(row_index)] = send_y1[i][j][k]
+                                row_index += 1
+                        '''    
+                        # Проходим по каждому элементу массива отсканированному 
+            
+            #пвтаемся пройти !!!!!!!!!!!!!!!!!!!
+            #c какой стороки начинаем 
+            
+
+            row_index = last_row 
+
+            
+            #print(description_mas)
+
+            #проверка что есть элементы
+            pusto = False
+    
+            #разделитель для колонки описания 
+            code =' '
+    
+            #проверка на первый раз  использования
+            first_ras = True
+            
+            # проверка найдено ли совпадение 
+            found = False
     
             #проверка на то что мы отсканировали нужно ли вставлять 
             nuzno = True
@@ -509,18 +646,56 @@ def fromPDftoExelspec(file):
                                 if first_ras and cdvig == last_row + 1:    
                                     description = preded
                                     description_send = description.split(code)
-                                    worksheet['H' + str(row_index)] = description_send[0] 
+                                    
+
+                                    for word in description_mas:
+                                        if j+1 < len(send_y1[i]):
+                                            if word in send_y1[i][j+1][k] or '-' in send_y1[i][j+1][k]:
+                                                found = True
+                                                #print(send_y1[i][j-3][k])
+                                    if found == False and j+1 < len(send_y1[i]):
+                                        if j+1 == (len(send_y1[i]) - 1) and sole_is_last == False: 
+                                            worksheet['H' + str(row_index)] = description_send[0]
+                                        else:               
+                                            #print(send_y1[i][j+1][k])
+                                            worksheet['H' + str(row_index)] = str(description_send[0] + ' ' + send_y1[i][j+1][k])
+                                    else:
+                                        worksheet['H' + str(row_index)] = description_send[0]
+
                                     first_ras = False
+                                    description_mas.append(description)
+
                                 else:
                                     description = send_y1[i][j-2][k]
                                     description_send = description.split(code)
-                                    worksheet['H' + str(row_index)] = description_send[0] 
+                                    for word in description_mas:
+                                        if j+1 < len(send_y1[i]):
+                                            if word in send_y1[i][j+1][k] or '-' in send_y1[i][j+1][k]:
+                                                found = True
+                                                #print(send_y1[i][j-3][k])
+                                    if found == False and j+1 < len(send_y1[i]):
+                                        if j+1 == (len(send_y1[i]) - 1) and sole_is_last == False: 
+                                            worksheet['H' + str(row_index)] = description_send[0]
+                                        else:               
+                                            #print(send_y1[i][j+1][k])
+                                            worksheet['H' + str(row_index)] = str(description_send[0] + ' ' + send_y1[i][j+1][k])
+                                    else:
+                                        worksheet['H' + str(row_index)] = description_send[0]
+
                                     first_ras = False
-
-                                
-
+                                    description_mas.append(description)
+                                found = False
                                 # увеличение индекса строки на 1 
                                 row_index += 1
+                            else:
+                                if i == 0 and j == 0 and k == 0 and '-' not in send_y1[0][0][0] and cdvig == last_row + 1 :     
+                                    # Получаем значение из первой ячейки
+                                    cell_value = worksheet['H' + str(row_index)].value
+
+                                    # Добавляем значение через пробел
+                                    worksheet['H' + str(row_index)].value = cell_value + ' ' + str(send_y1[0][0][0])
+                                    #print("n99999" + str(send_y1[0][0][0]))
+                                #if (i + 1) != len and (j + 1) != 0 and (k + 1) != 0 and '-' not in send_y1[0][0][0] and cdvig == last_row + 1 :
                                 
                             '''    
                             if 'Deposit:' in str(send_y1[i][j][k]):
@@ -528,19 +703,37 @@ def fromPDftoExelspec(file):
                             '''
                         # возрощаем значение для проверки
                         nuzno  = True
-                         
-                        
+                          
+            
 
-                        '''
-                        #провверка не другой ли формат $$$$$
-                        if net_li == True:
-                             #проверка на нан , часто пападается (это работает если столбец не пустой проверки!)
-                            if str(send_y1[i][j][k]) == 'nan':
-                                pass
-                            else:
-                                worksheet['H' + str(row_index)] = send_y1[i][j][k]
-                                row_index += 1
-                        '''        
+
+            '''
+            print(description_mas)
+            print(len(description_mas))
+            
+            for i in range(len(send_y1)):
+                for j in range(len(send_y1[i])):
+                    for k in range(len(send_y1[i][j])):
+                        
+                            #находим строчку со страной и от нее и скачим 
+                            if   'Country' in str(send_y1[i][j][k]) and len(send_y1[i]) > (j + 1):
+                                for z in range(len(description_mas)):
+                            
+
+                                        #print(description_mas[z])
+                                        if description_mas[z].replace(" ", "") in str(send_y1[i][j+1][k]).replace(" ", "") or (prov_sol[w] in str(send_all[i][j+1][k]) and '%' in str(send_all[i][j+1][k])) :
+                                            #print(description_mas[z].replace(" ", ""))
+                                            #print(str(send_y1[i][j+1][k]).replace(" ", ""))
+                                            #print(send_y1[i][j+1][k])
+                                            break
+                                            #break
+                                            #pass
+                                        #else:
+                                            #print(description_mas[w])
+                                           # print(send_y1[i][j+1][k])
+                                           # break
+                                        print(send_y1[i][j+1][k])
+            '''
             preded  =  send_y1[-1][-1][-1] 
             #net_li = False              
     
@@ -1251,4 +1444,4 @@ def fromPDftoExelspec(file):
 
 
 
-#fromPDftoExelspec(file)
+fromPDftoExelspec(file)

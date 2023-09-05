@@ -32,70 +32,22 @@ import openpyxl
 #DISC = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 1, relative_area = True,area=(21, 74, 69, 78))
 #VALUE = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 1, relative_area = True,area=(21, 78, 69, 89))
 #CI = tabula.read_pdf('54564-54566.pdf', stream = True, multiple_tables = False, pages= 1, relative_area = True,area=(21, 88, 69, 94))
-y = tabula.read_pdf("54564-54566.pdf", stream = True, multiple_tables = False, pages= 8, relative_area = True,area=(21, 45, 69, 53))
-           
-check = np.array(y)
-print(check)
+#y = tabula.read_pdf("54564-54566.pdf", stream = True, multiple_tables = False, pages= 8, relative_area = True,area=(21, 45, 69, 53))
+import warnings
+#with warnings.catch_warnings():
+#warnings.filterwarnings('ignore')
+#tabula.java_options = "-DsuppressSwingDropSupportWarning=true"
+y = tabula.read_pdf("54564-54566.pdf",  stream = True, multiple_tables = False, pages= 8, relative_area = True,area=(5, 6, 15, 16), silent = True)
+ 
+
+#check = np.array(y)
+#print(check)
 
 #print(check)
 
-send = np.array(y)
+#send = np.array(y)
 
-df = pd.DataFrame(send[0])
+#df = pd.DataFrame(send[0])
 
-df.to_excel('example.xlsx', index=False)
+#df.to_excel('example.xlsx', index=False)
 
---
-                                 # обработка этой строки на нужные слова !!!!!  - не учитывапется если нет sole
-                                my_list = send_y1[i][j][k].split('Country of origin:')
-                                if len(my_list) == 1: 
-                                    my_list = my_list[0].split('H. S')
-                                if len(my_list) > 1: 
-                                    my_list = my_list[1].split('H. S')
-                                
-                                if len(my_list) == 2:
-                                    worksheet['J' + str(row_index)] = my_list[0].replace(" ", "")
-                                    #oтделяем по :
-                                    hs = str(my_list[1].replace(":", "")) 
-                                    worksheet['K' + str(row_index)] = hs.replace(" ", "")
-                                    code = my_list[1].replace(" ", "")
-                                    code = code.replace(":", "")
-                                if len(my_list) > 2:
-                                    #!!!!!!!!!!!!!!!!
-                                    hs = str(my_list[0].replace(":", ""))
-                                    worksheet['J' + str(row_index)] = hs.replace(" ", "")
-                                    code = my_list[len(my_list) - 1].replace(" ", "")
-                                    code = code.replace(":", "")
-                                
-                                if len(my_list) < 2:
-                                    #!!!!!!!!!!!!!!!!
-                                    hs = str(my_list[0].replace(":", ""))
-                                    worksheet['J' + str(row_index)] = hs.replace(" ", "")
-                                    code = my_list[0].replace(" ", "")
-                                    code = code.replace(":", "")
-                                
-                                #print(code)
-                                '''
-                                if cdvig == last_row:
-                                    description = send_y1[i][j-2][k]
-                                    description_send = description.split(code)
-                                    
-                                    worksheet['H' + str(row_index)] = description_send[0]
-                                else:
-                                    
-                                    if row_index != last_row:
-                                        description = send_y1[i][j-2][k]
-                                        description_send = description.split(code)
-                                        worksheet['H' + str(row_index)] = description_send[0]
-                                '''
-                                description = send_y1[i][j-2][k]
-                                description_send = description.split(code)
-                                worksheet['H' + str(row_index)] = description_send[0]
-
-                                if first_ras and cdvig == last_row + 1:    
-                                    description = preded
-                                    description_send = description.split(code)
-                                    worksheet['H' + str(row_index)] = description_send[0] 
-                                    first_ras = False
-
-                                preded  =  send_y1[-1][-1][-1] 
